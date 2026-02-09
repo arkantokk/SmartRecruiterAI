@@ -1,0 +1,6 @@
+@SmartRecruiter.API_HostAddress = http://localhost:5218
+
+GET {{SmartRecruiter.API_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
