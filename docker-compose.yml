@@ -1,21 +1,16 @@
-﻿services:
-  db:
-    image: postgres:16.2-alpine
-    container_name: sr_postgres
-    restart: unless-stopped
-    ports:
-      - "5432:5432"
+﻿version: '3.8'
+
+services:
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: smartrecruiter-db
     environment:
-      POSTGRES_USER: admin
-      POSTGRES_PASSWORD: super_secure_password
-      POSTGRES_DB: smart_recruiter_db
+      - ACCEPT_EULA=Y
+      - MSSQL_SA_PASSWORD=StrongPassword123! 
+    ports:
+      - "1433:1433"
     volumes:
-      - postgres_data:/var/lib/postgresql/data
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U admin -d smart_recruiter_db"]
-      interval: 5s
-      timeout: 5s
-      retries: 5
+      - sqlvolume:/var/opt/mssql
 
 volumes:
-  postgres_data:
+  sqlvolume:
