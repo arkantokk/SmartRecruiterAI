@@ -1,4 +1,4 @@
-﻿using SmartRecruiter.Domain.Entities;
+﻿/*using SmartRecruiter.Domain.Entities;
 using SmartRecruiter.Domain.Interfaces;
 
 namespace SmartRecruiter.Domain.Services;
@@ -25,4 +25,4 @@ public class CandidateEvaluationService
         var evaluation = await _aiService.EvaluateCandidateAsync(resumeText, vacancy.AiPromptTemplate);
         candidate.UpdateAssessment(evaluation);
     }
-}
+}*/

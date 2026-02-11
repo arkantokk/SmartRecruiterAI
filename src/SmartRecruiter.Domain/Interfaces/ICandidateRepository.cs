@@ -6,4 +6,5 @@ public interface ICandidateRepository
 {
     Task AddAsync(Candidate candidate);
     Task<Candidate?> GetByIdAsync(Guid id);
+    Task<IEnumerable<Candidate>> GetAllCandidatesAsync();
 }

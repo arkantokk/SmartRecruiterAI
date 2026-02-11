@@ -11,10 +11,12 @@ public class CandidatesController : ControllerBase
 {
     private readonly CandidateService _candidateService;
     private readonly IValidator<CreateCandidateRequest> _validator;
-    public CandidatesController(CandidateService candidateService, IValidator<CreateCandidateRequest> validator)
+    private readonly IFileParsingService _parsingService;
+    public CandidatesController(CandidateService candidateService, IValidator<CreateCandidateRequest> validator, IFileParsingService parsingService)
     {
         _candidateService = candidateService;
         _validator = validator;
+        _parsingService = parsingService;
     }
 
     [HttpPost]
@@ -34,5 +36,21 @@ public class CandidatesController : ControllerBase
     {
         var res = await _candidateService.GetAllCandidatesAsync();
         return Ok(res);
+    }
+    
+    [HttpPost("test-upload")]
+    public async Task<IActionResult> TestUpload(IFormFile file)
+    {
+        if (file == null || file.Length == 0)
+            return BadRequest("Файл не обрано");
+
+        // Відкриваємо потік (не завантажуючи весь файл в пам'ять)
+        using var stream = file.OpenReadStream();
+    
+        // Викликаємо наш новий сервіс
+        var text = await _parsingService.ExtractTextAsync(stream);
+
+        // Повертаємо прочитаний текст, щоб ти побачив його очима
+        return Ok(new { FileName = file.FileName, ExtractedText = text });
     }
 }

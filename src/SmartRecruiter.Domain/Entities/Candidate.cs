@@ -52,4 +52,10 @@ public class Candidate
             _skills.Add(cleanSkill);
         }
     }
+
+    public void Evaluate(int score, string summary, List<string> pros, List<string> cons)
+    {
+        Evaluation = new CandidateEvaluation(score, summary, pros, cons);
+        Status = CandidateStatus.Screening;
+    }
 }

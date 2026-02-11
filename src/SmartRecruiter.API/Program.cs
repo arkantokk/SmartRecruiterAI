@@ -1,5 +1,6 @@
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
+using SmartRecruiter.API.Workers;
 using SmartRecruiter.Application.Services;
 using SmartRecruiter.Application.Validators;
 using SmartRecruiter.Domain.Interfaces;
@@ -14,9 +15,11 @@ var connectionString = builder.Configuration.GetConnectionString("DefaultConnect
 builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseSqlServer(connectionString));
 builder.Services.AddScoped<ICandidateRepository, CandidateRepository>();
 builder.Services.AddScoped<IJobVacancyRepository, JobVacancyRepository>();
+builder.Services.AddScoped<IFileParsingService, PdfParsingService>();
 builder.Services.AddScoped<IAiService, MockAiService>();
 builder.Services.AddScoped<JobVacancyService>();
 builder.Services.AddScoped<CandidateService>();
+builder.Services.AddHostedService<EmailBackgroundWorker>();
 builder.Services.AddValidatorsFromAssemblyContaining<CreateCandidateValidator>();
 
 builder.Services.AddControllers();

@@ -15,8 +15,21 @@ public class ApplicationDbContext : DbContext
     
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        modelBuilder.Entity<Candidate>()
-            .OwnsOne(c => c.Evaluation);
+        modelBuilder.Entity<Candidate>(entity =>
+        {
+            entity.OwnsOne(c => c.Evaluation, evaluation =>
+            {
+                evaluation.Property(e => e.Pros)
+                    .HasConversion(
+                        v => string.Join(';', v),                // List -> String
+                        v => v.Split(';', StringSplitOptions.RemoveEmptyEntries).ToList()); // String -> List
+
+                evaluation.Property(e => e.Cons)
+                    .HasConversion(
+                        v => string.Join(';', v),
+                        v => v.Split(';', StringSplitOptions.RemoveEmptyEntries).ToList());
+            });
+        });
 
         base.OnModelCreating(modelBuilder);
     }

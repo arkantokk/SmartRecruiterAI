@@ -1,4 +1,5 @@
-﻿using SmartRecruiter.Domain.Entities;
+﻿using Microsoft.EntityFrameworkCore;
+using SmartRecruiter.Domain.Entities;
 using SmartRecruiter.Domain.Interfaces;
 using SmartRecruiter.Infrastructure.Persistance;
 
@@ -22,5 +23,10 @@ public class CandidateRepository : ICandidateRepository
     public async Task<Candidate?> GetByIdAsync(Guid id)
     {
         return await _context.Candidates.FindAsync(id);
+    }
+
+    public async Task<IEnumerable<Candidate>> GetAllCandidatesAsync()
+    {
+        return await _context.Candidates.ToListAsync();
     }
 }
