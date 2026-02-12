@@ -1,0 +1,29 @@
+﻿name: SmartRecruiter Build Validation
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build_and_check:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 1. Checkout repository
+        uses: actions/checkout@v4
+
+      - name: 2. Setup .NET SDK
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: 3. Restore dependencies
+        run: dotnet restore SmartRecruiterAI.sln
+
+      - name: 4. Build solution
+        run: dotnet build SmartRecruiterAI.sln --configuration Release --no-restore
+
+      - name: 5. Run Tests (якщо є)
+        run: dotnet test SmartRecruiterAI.sln --no-build --verbosity normal

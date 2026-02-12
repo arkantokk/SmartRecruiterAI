@@ -6,11 +6,24 @@ services:
     container_name: smartrecruiter-db
     environment:
       - ACCEPT_EULA=Y
-      - MSSQL_SA_PASSWORD=StrongPassword123! 
+      - MSSQL_SA_PASSWORD=StrongPassword123!
     ports:
       - "1433:1433"
     volumes:
       - sqlvolume:/var/opt/mssql
 
+  azurite:
+    image: mcr.microsoft.com/azure-storage/azurite
+    container_name: smartrecruiter-storage
+    hostname: azurite
+    restart: always
+    ports:
+      - "10000:10000"
+      - "10001:10001"
+      - "10002:10002"
+    volumes:
+      - azuritevolume:/data
+    command: azurite --blobHost 0.0.0.0 --skipApiVersionCheck
 volumes:
   sqlvolume:
+  azuritevolume:

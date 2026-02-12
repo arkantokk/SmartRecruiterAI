@@ -1,17 +1,57 @@
-## Build results
+## --- BUILD & OUTPUT ---
 [Bb]in/
 [Oo]bj/
+/out/
+/artifacts/
 
-## User-specific files
+## --- USER SPECIFIC & OS ---
 *.suo
 *.user
 *.userosscache
 *.sln.docstates
+.DS_Store
+Thumbs.db
+Desktop.ini
 
-## Rider / JetBrains
+## --- IDEs (EDITORS) ---
+# Rider / JetBrains
 .idea/
 *.sln.iml
 
-## OS specific
-.DS_Store
-Thumbs.db
+# Visual Studio
+.vs/
+*_i.c
+*_p.c
+*.ncb
+*.suo
+*.tlb
+*.tlh
+*.bak
+*.cache
+*.ilk
+*.log
+*.pdb
+
+# VS Code
+.vscode/
+
+## --- TESTING ---
+TestResults/
+*.trx
+
+## --- SECURITY & CONFIGS (ВАЖЛИВО!) ---
+appsettings.Local.json
+appsettings.Development.json
+.env
+
+# User Secrets 
+secrets.json
+
+## --- NUGET ---
+*.nupkg
+packages/
+!packages.config
+
+## --- CRASH DUMPS ---
+*.dmp
+*.mdmp
