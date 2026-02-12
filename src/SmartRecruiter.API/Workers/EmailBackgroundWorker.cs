@@ -1,4 +1,4 @@
-﻿using System.Text; // Required for StringBuilder
+﻿using System.Text;
 using MailKit;
 using MailKit.Net.Imap;
 using MailKit.Search;
@@ -14,18 +14,21 @@ public class EmailBackgroundWorker : BackgroundService
     private readonly IServiceScopeFactory _scopeFactory;
     private readonly ILogger<EmailBackgroundWorker> _logger;
     private readonly IConfiguration _configuration;
-
+    private readonly IStorageService _storageService;
     private const string MailServer = "imap.gmail.com";
     private const int MailPort = 993;
 
     public EmailBackgroundWorker(
-        IServiceScopeFactory scopeFactory, 
+        IServiceScopeFactory scopeFactory,
         ILogger<EmailBackgroundWorker> logger,
-        IConfiguration configuration)
+        IConfiguration configuration,
+        IStorageService storageService
+    )
     {
         _scopeFactory = scopeFactory;
         _logger = logger;
         _configuration = configuration;
+        _storageService = storageService;
     }
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -35,33 +38,27 @@ public class EmailBackgroundWorker : BackgroundService
 
         if (string.IsNullOrEmpty(mailUser) || string.IsNullOrEmpty(mailPassword))
         {
-            _logger.LogError("❌ Email credentials missing! Run 'dotnet user-secrets set' to configure.");
+            _logger.LogError("Email credentials missing");
             return;
         }
-
-        _logger.LogInformation($"📧 Email Worker Started via IMAP for {mailUser}...");
 
         while (!stoppingToken.IsCancellationRequested)
         {
             try
             {
-                // Create a new client for every iteration to ensure stability
                 using (var client = new ImapClient())
                 {
-                    client.Timeout = 10000; // 10 seconds timeout
+                    client.Timeout = 10000;
                     await client.ConnectAsync(MailServer, MailPort, true, stoppingToken);
                     await client.AuthenticateAsync(mailUser, mailPassword, stoppingToken);
 
                     var inbox = client.Inbox;
                     await inbox.OpenAsync(FolderAccess.ReadWrite, stoppingToken);
 
-                    // Search for UNSEEN emails only
                     var uids = await inbox.SearchAsync(SearchQuery.NotSeen, stoppingToken);
 
                     if (uids.Count > 0)
                     {
-                        _logger.LogInformation($"🔥 Found {uids.Count} new emails! Processing...");
-
                         using (var scope = _scopeFactory.CreateScope())
                         {
                             var candidateService = scope.ServiceProvider.GetRequiredService<CandidateService>();
@@ -72,93 +69,70 @@ public class EmailBackgroundWorker : BackgroundService
                             {
                                 var message = await inbox.GetMessageAsync(uid, stoppingToken);
                                 var subject = message.Subject.Trim();
-                                
-                                _logger.LogInformation($"📩 Checking email Subject: '{subject}'");
 
-                                // 1. Match Email Subject with Job Vacancy Title
                                 var vacancy = await vacancyRepository.GetByTitleAsync(subject);
 
                                 if (vacancy != null)
                                 {
-                                    _logger.LogInformation($"✅ Matched Vacancy: {vacancy.Title} (ID: {vacancy.Id})");
-
-                                    // 2. AGGREGATE CONTEXT (Body + Attachments)
-                                    // We use StringBuilder to combine everything into one large text for AI
                                     var fullDossier = new StringBuilder();
 
-                                    // A) Append Email Body (Cover Letter)
-                                    fullDossier.AppendLine("=== EMAIL BODY / COVER LETTER ===");
-                                    fullDossier.AppendLine(message.TextBody ?? "(No text body provided)");
+                                    // Collect Email Body
+                                    fullDossier.AppendLine("=== EMAIL BODY ===");
+                                    fullDossier.AppendLine(message.TextBody ?? string.Empty);
                                     fullDossier.AppendLine("\n=== ATTACHMENTS ===");
 
-                                    bool hasContent = false;
+                                    bool hasPdf = false;
+                                    string? resumeUrl = null;
 
-                                    // B) Loop through ALL attachments
                                     foreach (var attachment in message.Attachments)
                                     {
                                         if (attachment is MimePart part && part.FileName.ToLower().EndsWith(".pdf"))
                                         {
-                                            _logger.LogInformation($"📎 Reading PDF: {part.FileName}");
-                                            
-                                            // Process PDF in memory
                                             using (var stream = new MemoryStream())
                                             {
                                                 await part.Content.DecodeToAsync(stream, stoppingToken);
-                                                stream.Position = 0; // Rewind stream
-                                                
-                                                var pdfText = await parsingService.ExtractTextAsync(stream);
-                                                
-                                                // C) Append PDF text to dossier
-                                                fullDossier.AppendLine($"--- DOCUMENT: {part.FileName} ---");
-                                                fullDossier.AppendLine(pdfText);
-                                                fullDossier.AppendLine("--------------------------------");
-                                                
-                                                hasContent = true;
+                                                stream.Position = 0;
+                                                var text = await parsingService.ExtractTextAsync(stream);
+                                                fullDossier.AppendLine($"--- FILE: {part.FileName} ---");
+                                                fullDossier.AppendLine(text);
+                                                stream.Position = 0;
+                                                resumeUrl = await _storageService.UploadAsync(stream, part.FileName,
+                                                    "application/pdf");
+
+                                                hasPdf = true;
                                             }
                                         }
                                     }
 
-                                    // 3. Register Candidate if we found any PDF or significant text
-                                    if (hasContent || fullDossier.Length > 50)
+                                    if (hasPdf || fullDossier.Length > 100)
                                     {
                                         var request = new CreateCandidateRequest
                                         {
                                             FirstName = message.From.Mailboxes.FirstOrDefault()?.Name ?? "Unknown",
-                                            LastName = "(From Email)",
+                                            LastName = "Candidate",
                                             Email = message.From.Mailboxes.FirstOrDefault()?.Address ?? "no-email",
                                             JobVacancyId = vacancy.Id,
-                                            ResumeText = fullDossier.ToString() // Passing the full aggregated text
+                                            ResumeText = fullDossier.ToString(),
+                                            ResumeUrl = resumeUrl
                                         };
 
-                                        var newId = await candidateService.RegisterCandidateAsync(request);
-                                        _logger.LogInformation($"🎉 SUCCESS! Candidate created via Email: {newId}");
+                                        await candidateService.RegisterCandidateAsync(request);
                                     }
-                                    else
-                                    {
-                                        _logger.LogWarning("⚠️ Email matched vacancy but contained no PDF or readable text.");
-                                    }
-                                }
-                                else
-                                {
-                                    _logger.LogWarning($"⚠️ Skipped: No vacancy found for subject '{subject}'");
                                 }
 
-                                // 4. Mark email as READ (Seen) so we don't process it again
                                 await inbox.AddFlagsAsync(uid, MessageFlags.Seen, true, stoppingToken);
                             }
                         }
                     }
-                    
+
                     await client.DisconnectAsync(true, stoppingToken);
                 }
             }
             catch (Exception ex)
             {
-                _logger.LogError($"🔥 Email Worker Error: {ex.Message}. Retrying in 15s...");
+                _logger.LogError($"Worker Error: {ex.Message}");
             }
 
-            // Wait 15 seconds before next check
-            _logger.LogInformation("💤 Waiting 15s for next check...");
             await Task.Delay(TimeSpan.FromSeconds(15), stoppingToken);
         }
     }

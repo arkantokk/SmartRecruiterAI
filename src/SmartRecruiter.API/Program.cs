@@ -13,12 +13,14 @@ var connectionString = builder.Configuration.GetConnectionString("DefaultConnect
 // Add services to the container.
 
 builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseSqlServer(connectionString));
+builder.Services.AddSingleton<IStorageService, BlobStorageService>();
 builder.Services.AddScoped<ICandidateRepository, CandidateRepository>();
 builder.Services.AddScoped<IJobVacancyRepository, JobVacancyRepository>();
 builder.Services.AddScoped<IFileParsingService, PdfParsingService>();
 builder.Services.AddHttpClient<IAiService, OpenAiService>();
 builder.Services.AddScoped<JobVacancyService>();
 builder.Services.AddScoped<CandidateService>();
+builder.Services.AddSingleton<IStorageService,BlobStorageService>();
 builder.Services.AddHostedService<EmailBackgroundWorker>();
 builder.Services.AddValidatorsFromAssemblyContaining<CreateCandidateValidator>();
 

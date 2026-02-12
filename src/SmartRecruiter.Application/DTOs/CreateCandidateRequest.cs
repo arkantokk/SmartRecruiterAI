@@ -7,4 +7,5 @@ public class CreateCandidateRequest
     public string Email { get; set; } = string.Empty;
     public Guid JobVacancyId { get; set; } = Guid.Empty;
     public string ResumeText { get; set; } = string.Empty;
+    public string? ResumeUrl { get; set; }
 }

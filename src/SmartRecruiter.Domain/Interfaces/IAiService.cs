@@ -1,9 +1,9 @@
-﻿using SmartRecruiter.Domain.Entities;
-using SmartRecruiter.Domain.ValueObjects;
+﻿using SmartRecruiter.Domain.DTOs;
+using SmartRecruiter.Domain.Entities;
 
 namespace SmartRecruiter.Domain.Interfaces;
 
 public interface IAiService
 {
-    Task<CandidateEvaluation> EvaluateCandidateAsync(Candidate candidate, JobVacancy jobVacancy, string resumeText);
+    Task<AiAnalysisResult> EvaluateCandidateAsync(JobVacancy vacancy, string resumeText);
 }

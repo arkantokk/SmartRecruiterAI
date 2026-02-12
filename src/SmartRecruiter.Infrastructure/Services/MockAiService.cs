@@ -1,4 +1,4 @@
-﻿using SmartRecruiter.Domain.Entities;
+﻿/*using SmartRecruiter.Domain.Entities;
 using SmartRecruiter.Domain.Interfaces;
 using SmartRecruiter.Domain.ValueObjects;
 
@@ -35,4 +35,4 @@ public class MockAiService : IAiService
         // 3. Повертаємо Value Object
         return new CandidateEvaluation(score, summary, pros, cons, skills);
     }
-}
+}*/
