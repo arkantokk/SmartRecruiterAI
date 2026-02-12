@@ -53,9 +53,35 @@ public class Candidate
         }
     }
 
-    public void Evaluate(int score, string summary, List<string> pros, List<string> cons)
+    public void Evaluate(int score, string summary, List<string> pros, List<string> cons, List<string> skills)
     {
-        Evaluation = new CandidateEvaluation(score, summary, pros, cons);
+        Evaluation = new CandidateEvaluation(score, summary, pros, cons, skills);
+        Status = CandidateStatus.Screening;
+    }
+    
+    public void ApplyAiAnalysis(
+        string? extractedFirstName, 
+        string? extractedLastName, 
+        int score, 
+        string summary, 
+        List<string> pros, 
+        List<string> cons, 
+        List<string> skills)
+    {
+        if (!string.IsNullOrWhiteSpace(extractedFirstName))
+            FirstName = extractedFirstName;
+
+        if (!string.IsNullOrWhiteSpace(extractedLastName))
+            LastName = extractedLastName;
+        
+        Evaluation = new CandidateEvaluation(score, summary, pros, cons, skills);
+        
+        _skills.Clear();
+        if (skills != null)
+        {
+            _skills.AddRange(skills);
+        }
+        
         Status = CandidateStatus.Screening;
     }
 }

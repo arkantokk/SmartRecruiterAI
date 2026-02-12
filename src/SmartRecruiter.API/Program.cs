@@ -16,7 +16,7 @@ builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseSqlSer
 builder.Services.AddScoped<ICandidateRepository, CandidateRepository>();
 builder.Services.AddScoped<IJobVacancyRepository, JobVacancyRepository>();
 builder.Services.AddScoped<IFileParsingService, PdfParsingService>();
-builder.Services.AddScoped<IAiService, MockAiService>();
+builder.Services.AddHttpClient<IAiService, OpenAiService>();
 builder.Services.AddScoped<JobVacancyService>();
 builder.Services.AddScoped<CandidateService>();
 builder.Services.AddHostedService<EmailBackgroundWorker>();

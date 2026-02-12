@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using System.Text.Json;
+using Microsoft.EntityFrameworkCore;
 using SmartRecruiter.Domain.Entities;
 
 namespace SmartRecruiter.Infrastructure.Persistance;
@@ -15,19 +16,26 @@ public class ApplicationDbContext : DbContext
     
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
-        modelBuilder.Entity<Candidate>(entity =>
+        modelBuilder.Entity<Candidate>(builder =>
         {
-            entity.OwnsOne(c => c.Evaluation, evaluation =>
-            {
-                evaluation.Property(e => e.Pros)
-                    .HasConversion(
-                        v => string.Join(';', v),                // List -> String
-                        v => v.Split(';', StringSplitOptions.RemoveEmptyEntries).ToList()); // String -> List
+            builder.HasKey(c => c.Id);
 
-                evaluation.Property(e => e.Cons)
+            builder.OwnsOne(c => c.Evaluation, a =>
+            {
+                a.Property(e => e.Pros)
                     .HasConversion(
-                        v => string.Join(';', v),
-                        v => v.Split(';', StringSplitOptions.RemoveEmptyEntries).ToList());
+                        v => JsonSerializer.Serialize(v, (JsonSerializerOptions)null),
+                        v => JsonSerializer.Deserialize<List<string>>(v, (JsonSerializerOptions)null));
+                
+                a.Property(e => e.Cons)
+                    .HasConversion(
+                        v => JsonSerializer.Serialize(v, (JsonSerializerOptions)null),
+                        v => JsonSerializer.Deserialize<List<string>>(v, (JsonSerializerOptions)null));
+                
+                a.Property(e => e.Skills)
+                    .HasConversion(
+                        v => JsonSerializer.Serialize(v, (JsonSerializerOptions)null), // C# -> JSON String
+                        v => JsonSerializer.Deserialize<List<string>>(v, (JsonSerializerOptions)null)); // JSON String -> C#
             });
         });
 

@@ -8,7 +8,7 @@ public class MockAiService : IAiService
 {
     private readonly Random _random = new Random();
 
-    public async Task<CandidateEvaluation> EvaluateCandidateAsync(Candidate candidate, JobVacancy vacancy)
+    public async Task<CandidateEvaluation> EvaluateCandidateAsync(Candidate candidate, JobVacancy vacancy, string resumeText)
     {
         await Task.Delay(2000); // Чекаємо 2 секунди
 
@@ -20,7 +20,9 @@ public class MockAiService : IAiService
             "Має профільну освіту", 
             "Добре структуроване резюме" 
         };
-        
+        var skills = new List<string>();
+        var firstName = "Joe";
+        var lastName = "Doe";
         var cons = new List<string> 
         { 
             "Малий досвід роботи з Docker", 
@@ -31,6 +33,6 @@ public class MockAiService : IAiService
                       $"Попередній висновок: кандидат виглядає перспективно, але потребує технічної співбесіди.";
 
         // 3. Повертаємо Value Object
-        return new CandidateEvaluation(score, summary, pros, cons);
+        return new CandidateEvaluation(score, summary, pros, cons, skills);
     }
 }

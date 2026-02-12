@@ -20,13 +20,25 @@ public class CandidatesController : ControllerBase
     }
 
     [HttpPost]
-    public async Task<IActionResult> CreateCandidate([FromBody] CreateCandidateRequest request)
+    public async Task<IActionResult> Create(
+        [FromForm] CreateCandidateRequest request, // Зверни увагу: FromForm, бо ми шлемо файл
+        IFormFile? file) // Файл приходить окремо
     {
-        var validationResult = await _validator.ValidateAsync(request);
-        if (!validationResult.IsValid)
+        // 1. Якщо файл є - парсимо його прямо тут
+        if (file != null && file.Length > 0)
         {
-            return BadRequest(validationResult.Errors);
+            await using var stream = file.OpenReadStream();
+            // Тобі треба додати _parsingService в конструктор контролера!
+            request.ResumeText = await _parsingService.ExtractTextAsync(stream);
         }
+    
+        // 2. Якщо тексту немає (ані файлу, ані тексту) - помилка
+        if (string.IsNullOrWhiteSpace(request.ResumeText))
+        {
+            return BadRequest("Resume text or PDF file is required.");
+        }
+
+        // 3. Віддаємо в сервіс вже заповнений об'єкт
         var id = await _candidateService.RegisterCandidateAsync(request);
         return Ok(id);
     }
@@ -45,7 +57,7 @@ public class CandidatesController : ControllerBase
             return BadRequest("Файл не обрано");
 
         // Відкриваємо потік (не завантажуючи весь файл в пам'ять)
-        using var stream = file.OpenReadStream();
+        await using var stream = file.OpenReadStream();
     
         // Викликаємо наш новий сервіс
         var text = await _parsingService.ExtractTextAsync(stream);

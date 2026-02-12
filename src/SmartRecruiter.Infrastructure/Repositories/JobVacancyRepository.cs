@@ -1,4 +1,5 @@
-﻿using SmartRecruiter.Domain.Entities;
+﻿using Microsoft.EntityFrameworkCore;
+using SmartRecruiter.Domain.Entities;
 using SmartRecruiter.Domain.Interfaces;
 using SmartRecruiter.Infrastructure.Persistance;
 
@@ -22,5 +23,10 @@ public class JobVacancyRepository : IJobVacancyRepository
     public async Task<JobVacancy?> GetByIdAsync(Guid id)
     {
         return await _context.JobVacancies.FindAsync(id);
+    }
+
+    public async Task<JobVacancy?> GetByTitleAsync(string title)
+    {
+        return await _context.JobVacancies.FirstOrDefaultAsync(v => v.Title.ToLower() == title.ToLower());
     }
 }

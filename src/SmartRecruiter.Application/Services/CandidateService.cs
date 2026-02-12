@@ -18,11 +18,12 @@ public class CandidateService
 
     public async Task<Guid> RegisterCandidateAsync(CreateCandidateRequest request)
     {
-        var candidate = new Candidate(request.FirstName, request.LastName, request.Email, request.JobVacancyId);
         var jobVacancy = await _vacancyRepository.GetByIdAsync(request.JobVacancyId);
         if (jobVacancy == null) throw new ArgumentNullException();
-        var evaluation = await _aiService.EvaluateCandidateAsync(candidate, jobVacancy);
-        candidate.Evaluate(evaluation.Score, evaluation.Summary, evaluation.Pros, evaluation.Cons);
+        var candidate = new Candidate(request.FirstName, request.LastName, request.Email, request.JobVacancyId);
+        var evaluation = await _aiService.EvaluateCandidateAsync(candidate, jobVacancy, request.ResumeText);
+        
+        candidate.Evaluate(evaluation.Score, evaluation.Summary, evaluation.Pros, evaluation.Cons, evaluation.Skills);
         await _repository.AddAsync(candidate);
         return candidate.Id;
     }

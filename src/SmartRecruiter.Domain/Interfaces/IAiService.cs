@@ -5,5 +5,5 @@ namespace SmartRecruiter.Domain.Interfaces;
 
 public interface IAiService
 {
-    Task<CandidateEvaluation> EvaluateCandidateAsync(Candidate candidate, JobVacancy jobVacancy);
+    Task<CandidateEvaluation> EvaluateCandidateAsync(Candidate candidate, JobVacancy jobVacancy, string resumeText);
 }
