@@ -1,5 +1,6 @@
 ﻿using SmartRecruiter.Application.DTOs;
 using SmartRecruiter.Domain.Entities;
+using SmartRecruiter.Domain.Enums;
 using SmartRecruiter.Domain.Interfaces;
 
 namespace SmartRecruiter.Application.Services;
@@ -65,15 +66,23 @@ public class CandidateService
     {
         var candidates = await _repository.GetAllCandidatesAsync();
 
-        return candidates.Select(c => new CandidateDto(
-            c.Id,
-            c.FirstName,
-            c.LastName,
-            c.Email,
-            c.ResumeUrl != null ? _storageService.GenerateReadOnlyUrl(c.ResumeUrl, TimeSpan.FromHours(1)) : null,
-            c.Evaluation.Score,
-            c.Evaluation.Summary,
-            c.Evaluation.Skills
-        ));
+        return candidates
+            .OrderByDescending(c => c.Evaluation.Score)
+            .Select(c => new CandidateDto(
+                c.Id,
+                c.FirstName,
+                c.LastName,
+                c.Email,
+                c.ResumeUrl != null ? _storageService.GenerateReadOnlyUrl(c.ResumeUrl, TimeSpan.FromHours(1)) : null,
+                c.Evaluation?.Score ?? 0,
+                c.Evaluation?.Summary ?? string.Empty,
+                c.Evaluation?.Skills ?? new List<string>(),
+                c.Status.ToString()
+            ));
+    }
+
+    public async Task UpdateStatusAsync(Guid id, CandidateStatus newStatus)
+    {
+        await _repository.UpdateStatusAsync(id, newStatus);
     }
 }
