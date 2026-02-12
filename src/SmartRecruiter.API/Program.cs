@@ -20,7 +20,6 @@ builder.Services.AddScoped<IFileParsingService, PdfParsingService>();
 builder.Services.AddHttpClient<IAiService, OpenAiService>();
 builder.Services.AddScoped<JobVacancyService>();
 builder.Services.AddScoped<CandidateService>();
-builder.Services.AddSingleton<IStorageService,BlobStorageService>();
 builder.Services.AddHostedService<EmailBackgroundWorker>();
 builder.Services.AddValidatorsFromAssemblyContaining<CreateCandidateValidator>();
 
