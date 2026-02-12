@@ -6,5 +6,6 @@
     string? ResumeUrl,
     int Score,
     string Summary,
-    List<string> Skills
+    List<string> Skills,
+    string Status
 );

@@ -84,4 +84,9 @@ public class Candidate
         
         Status = CandidateStatus.Screening;
     }
+
+    public async void ChangeStatus(CandidateStatus newStatus)
+    {
+        Status = newStatus;
+    }
 }
