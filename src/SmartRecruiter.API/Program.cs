@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using SmartRecruiter.API.Middleware;
 using SmartRecruiter.API.Workers;
+using SmartRecruiter.Application.Interfaces;
 using SmartRecruiter.Application.Services;
 using SmartRecruiter.Application.Validators;
 using SmartRecruiter.Domain.Interfaces;
@@ -45,6 +46,7 @@ builder.Services.AddAuthentication(options =>
                 Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]!))
         };
     });
+builder.Services.AddScoped<IAuthService, IdentityAuthService>();
 builder.Services.AddScoped<IFileParsingService, PdfParsingService>();
 builder.Services.AddHttpClient<IAiService, OpenAiService>();
 builder.Services.AddScoped<JobVacancyService>();

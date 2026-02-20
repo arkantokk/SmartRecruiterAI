@@ -12,23 +12,25 @@ public class GlobalExceptionHandler : IExceptionHandler
         _logger = logger;
     }
 
-    public async ValueTask<bool> TryHandleAsync(HttpContext httpContext, Exception exception, CancellationToken cancellationToken)
+    public async ValueTask<bool> TryHandleAsync(HttpContext httpContext, Exception exception,
+        CancellationToken cancellationToken)
     {
         _logger.LogError(exception, "Server crashed: {Message}", exception.Message);
         var statusCode = exception switch
         {
             KeyNotFoundException => StatusCodes.Status404NotFound,
             ArgumentNullException => StatusCodes.Status400BadRequest,
-            _ => StatusCodes.Status500InternalServerError 
+            UnauthorizedAccessException => StatusCodes.Status401Unauthorized,
+            _ => StatusCodes.Status500InternalServerError
         };
-        
+
         var problemDetails = new ProblemDetails
         {
             Status = statusCode,
             Title = "A App error occurred.",
-            Detail = exception.Message 
+            Detail = exception.Message
         };
-        
+
         httpContext.Response.StatusCode = statusCode;
         await httpContext.Response.WriteAsJsonAsync(problemDetails, cancellationToken);
 
