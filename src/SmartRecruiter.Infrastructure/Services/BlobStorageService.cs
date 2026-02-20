@@ -13,8 +13,7 @@ public class BlobStorageService : IStorageService
 
     public BlobStorageService(IConfiguration configuration)
     {
-        var connectionString = configuration.GetConnectionString("AzureStorage") 
-                               ?? throw new ArgumentNullException("AzureStorage connection string is missing");
+        var connectionString = configuration.GetConnectionString("AzureStorage") ?? throw new ArgumentNullException("AzureStorage connection string is missing");
         
         _containerName = configuration["AzureStorage:ContainerName"] ?? "resumes";
         _blobServiceClient = new BlobServiceClient(connectionString);

@@ -70,14 +70,7 @@ public class CandidatesController : ControllerBase
     [HttpPatch("{id:guid}/status")]
     public async Task<IActionResult> UpdateStatus(Guid id, [FromBody] CandidateStatus newStatus)
     {
-        try 
-        {
             await _candidateService.UpdateStatusAsync(id, newStatus);
             return NoContent();
-        }
-        catch (KeyNotFoundException)
-        {
-            return NotFound();
-        }
     }
 }

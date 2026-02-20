@@ -18,6 +18,7 @@ public class ApplicationDbContext : IdentityDbContext<IdentityUser>
     
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        base.OnModelCreating(modelBuilder); // moved to top to avoid inheritance errors
         modelBuilder.Entity<Candidate>(builder =>
         {
             builder.HasKey(c => c.Id);
@@ -40,7 +41,5 @@ public class ApplicationDbContext : IdentityDbContext<IdentityUser>
                         v => JsonSerializer.Deserialize<List<string>>(v, (JsonSerializerOptions)null)); // JSON String -> C#
             });
         });
-
-        base.OnModelCreating(modelBuilder);
     }
 }
