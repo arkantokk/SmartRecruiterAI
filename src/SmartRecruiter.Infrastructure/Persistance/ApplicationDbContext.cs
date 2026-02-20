@@ -1,10 +1,12 @@
 ﻿using System.Text.Json;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using SmartRecruiter.Domain.Entities;
 
 namespace SmartRecruiter.Infrastructure.Persistance;
 
-public class ApplicationDbContext : DbContext
+public class ApplicationDbContext : IdentityDbContext<IdentityUser>
 {
     public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options)
     {
@@ -16,6 +18,7 @@ public class ApplicationDbContext : DbContext
     
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        base.OnModelCreating(modelBuilder); // moved to top to avoid inheritance errors
         modelBuilder.Entity<Candidate>(builder =>
         {
             builder.HasKey(c => c.Id);
@@ -38,7 +41,5 @@ public class ApplicationDbContext : DbContext
                         v => JsonSerializer.Deserialize<List<string>>(v, (JsonSerializerOptions)null)); // JSON String -> C#
             });
         });
-
-        base.OnModelCreating(modelBuilder);
     }
 }
