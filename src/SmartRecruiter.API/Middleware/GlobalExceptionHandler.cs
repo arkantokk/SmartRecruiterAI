@@ -15,7 +15,8 @@ public class GlobalExceptionHandler : IExceptionHandler
     public async ValueTask<bool> TryHandleAsync(HttpContext httpContext, Exception exception,
         CancellationToken cancellationToken)
     {
-        _logger.LogError(exception, "Server crashed: {Message}", exception.Message);
+        _logger.LogError(exception, "Server error occurred: {Message}", exception.Message);
+
         var statusCode = exception switch
         {
             KeyNotFoundException => StatusCodes.Status404NotFound,
@@ -23,17 +24,27 @@ public class GlobalExceptionHandler : IExceptionHandler
             UnauthorizedAccessException => StatusCodes.Status401Unauthorized,
             _ => StatusCodes.Status500InternalServerError
         };
+        
+        var detailedMessage = exception.InnerException != null 
+            ? $"{exception.Message} | REAL CAUSE: {exception.InnerException.Message}" 
+            : exception.Message;
 
         var problemDetails = new ProblemDetails
         {
             Status = statusCode,
-            Title = "A App error occurred.",
-            Detail = exception.Message
+            Title = "An App error occurred.",
+            Detail = detailedMessage,
+            Instance = httpContext.Request.Path
         };
+        problemDetails.Extensions["debug_stackTrace"] = exception.StackTrace;
+
+        if (exception.InnerException?.StackTrace != null)
+        {
+            problemDetails.Extensions["debug_innerStackTrace"] = exception.InnerException.StackTrace;
+        }
 
         httpContext.Response.StatusCode = statusCode;
         await httpContext.Response.WriteAsJsonAsync(problemDetails, cancellationToken);
-
 
         return true;
     }
