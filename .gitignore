@@ -55,3 +55,24 @@ packages/
 ## --- CRASH DUMPS ---
 *.dmp
 *.mdmp
+
+## --- FRONTEND (NODE / REACT / VITE) ---
+# Dependencies
+node_modules/
+
+# Production build output (Vite uses dist/)
+dist/
+dist-ssr/
+build/
+
+# Local environment variables for frontend
+.env*.local
+
+# NPM/Yarn/PNPM crash logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Linting caches
+.eslintcache

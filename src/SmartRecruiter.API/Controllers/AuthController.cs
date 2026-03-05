@@ -19,7 +19,7 @@ public class AuthController : ControllerBase
         var result = await _authService.RegisterAsync(request);
         if (result.Succeeded)
         {
-            return Ok();
+            return Ok(result);
         }
         else
         {

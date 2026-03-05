@@ -1,3 +1,3 @@
 ﻿namespace SmartRecruiter.Application.DTOs;
 
-public record AuthResult(bool Succeeded, List<string> Errors );
+public record AuthResult(bool Succeeded, List<string> Errors, string Token );

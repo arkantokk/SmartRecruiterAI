@@ -19,6 +19,15 @@ var connectionString = builder.Configuration.GetConnectionString("DefaultConnect
 // Add services to the container.
 
 builder.Services.AddDbContext<ApplicationDbContext>(options => options.UseSqlServer(connectionString));
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowFrontend", policy =>
+    {
+        policy.WithOrigins("http://localhost:5173") // Your Vite frontend URL
+            .AllowAnyHeader()
+            .AllowAnyMethod();
+    });
+});
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 builder.Services.AddProblemDetails();
 builder.Services.AddSingleton<IStorageService, BlobStorageService>();
@@ -47,6 +56,7 @@ builder.Services.AddAuthentication(options =>
         };
     });
 builder.Services.AddScoped<IAuthService, IdentityAuthService>();
+builder.Services.AddScoped<ITokenService, TokenService>();
 builder.Services.AddScoped<IFileParsingService, PdfParsingService>();
 builder.Services.AddHttpClient<IAiService, OpenAiService>();
 builder.Services.AddScoped<JobVacancyService>();
@@ -69,6 +79,7 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+app.UseCors("AllowFrontend");
 app.UseAuthentication();
 app.UseAuthorization();
 
