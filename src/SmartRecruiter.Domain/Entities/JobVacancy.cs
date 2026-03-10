@@ -5,8 +5,8 @@ public class JobVacancy
     public Guid Id { get; private set; }
     public string Title { get; private set; }
     public string AiPromptTemplate { get; private set; }
-    
-    public JobVacancy(string title, string aiPromptTemplate)
+    public string UserId { get; private set; }
+    public JobVacancy(string title, string aiPromptTemplate, string userId)
     {
         if (string.IsNullOrWhiteSpace(title)) throw new ArgumentNullException(nameof(title));
         if (string.IsNullOrWhiteSpace(aiPromptTemplate)) throw new ArgumentNullException(nameof(aiPromptTemplate));
@@ -14,6 +14,7 @@ public class JobVacancy
         Id = Guid.NewGuid();
         Title = title;
         AiPromptTemplate = aiPromptTemplate;
+        UserId = userId;
     }
 
     public void UpdateAiPrompt(string newTemplate)
