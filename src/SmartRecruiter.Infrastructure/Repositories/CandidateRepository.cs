@@ -30,6 +30,13 @@ public class CandidateRepository : ICandidateRepository
     {
         return await _context.Candidates.ToListAsync();
     }
+    
+    public async Task<IEnumerable<Candidate>> GetCandidatesByUserIdAsync(string userId)
+    {
+        return await _context.Candidates
+            .Where(c => _context.JobVacancies.Any(v => v.Id == c.JobVacancyId && v.UserId == userId))
+            .ToListAsync();
+    }
 
     public async Task UpdateStatusAsync(Guid id, CandidateStatus newStatus)
     {

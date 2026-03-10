@@ -1,4 +1,6 @@
-﻿using FluentValidation;
+﻿using System.Security.Claims;
+using FluentValidation;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using SmartRecruiter.Application.DTOs;
 using SmartRecruiter.Application.Services;
@@ -7,6 +9,7 @@ using SmartRecruiter.Domain.Interfaces;
 
 namespace SmartRecruiter.API.Controllers;
 [ApiController]
+[Authorize]
 [Route("api/[controller]")]
 public class CandidatesController : ControllerBase
 {
@@ -47,7 +50,12 @@ public class CandidatesController : ControllerBase
     [HttpGet]
     public async Task<IActionResult> GetCandidates()
     {
-        var res = await _candidateService.GetAllCandidatesAsync();
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (userId == null)
+        {
+            return Unauthorized("User ID not found in token.");
+        }
+        var res = await _candidateService.GetCandidatesForUserAsync(userId);
         return Ok(res);
     }
     
