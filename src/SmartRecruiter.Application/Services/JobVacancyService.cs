@@ -13,9 +13,9 @@ public class JobVacancyService
         _jobVacancyRepository = jobVacancyRepository;
     }
 
-    public async Task<Guid> AddJobVacancyAsync(CreateJobVacancyRequest jobVacancyRequest)
+    public async Task<Guid> AddJobVacancyAsync(CreateJobVacancyRequest jobVacancyRequest, string userId)
     {
-        var job = new JobVacancy(jobVacancyRequest.Title, jobVacancyRequest.AiPromptTemplate);
+        var job = new JobVacancy(jobVacancyRequest.Title, jobVacancyRequest.AiPromptTemplate, userId);
         await _jobVacancyRepository.AddAsync(job);
 
         return job.Id;

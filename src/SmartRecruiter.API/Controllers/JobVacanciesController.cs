@@ -1,9 +1,12 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using System.Security.Claims;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using SmartRecruiter.Application.DTOs;
 using SmartRecruiter.Application.Services;
 
 namespace SmartRecruiter.API.Controllers;
 [ApiController]
+[Authorize]
 [Route("api/[controller]")]
 public class JobVacanciesController : ControllerBase
 {
@@ -17,7 +20,12 @@ public class JobVacanciesController : ControllerBase
     [HttpPost]
     public async Task<ActionResult> AddJobAsync(CreateJobVacancyRequest jobVacancyRequest)
     {
-        var id = await _jobVacancyService.AddJobVacancyAsync(jobVacancyRequest);
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (userId == null) 
+        {
+            return Unauthorized("User ID not found in token.");
+        }
+        var id = await _jobVacancyService.AddJobVacancyAsync(jobVacancyRequest, userId);
         return Ok(id);
     }
 }
