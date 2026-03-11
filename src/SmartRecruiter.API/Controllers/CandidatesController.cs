@@ -9,7 +9,7 @@ using SmartRecruiter.Domain.Interfaces;
 
 namespace SmartRecruiter.API.Controllers;
 [ApiController]
-[Authorize]
+
 [Route("api/[controller]")]
 public class CandidatesController : ControllerBase
 {
@@ -48,6 +48,7 @@ public class CandidatesController : ControllerBase
     }
 
     [HttpGet]
+    [Authorize]
     public async Task<IActionResult> GetCandidates()
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
