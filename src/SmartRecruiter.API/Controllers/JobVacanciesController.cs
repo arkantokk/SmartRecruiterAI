@@ -28,4 +28,12 @@ public class JobVacanciesController : ControllerBase
         var id = await _jobVacancyService.AddJobVacancyAsync(jobVacancyRequest, userId);
         return Ok(id);
     }
+
+    [HttpGet]
+    public async Task<ActionResult> GetUserVacancies()
+    {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        var vacancies = await _jobVacancyService.GetUserVacanciesAsync(userId);
+        return Ok(vacancies);
+    }
 }

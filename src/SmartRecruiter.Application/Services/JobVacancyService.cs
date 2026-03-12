@@ -20,4 +20,10 @@ public class JobVacancyService
 
         return job.Id;
     }
+
+    public async Task<IEnumerable<JobVacancy>> GetUserVacanciesAsync(string userId)
+    {
+        var vacancies = await _jobVacancyRepository.GetUserVacancies(userId);
+        return vacancies;
+    }
 }
