@@ -33,6 +33,7 @@ public class JobVacanciesController : ControllerBase
     public async Task<ActionResult> GetUserVacancies()
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (userId == null) return Unauthorized();
         var vacancies = await _jobVacancyService.GetUserVacanciesAsync(userId);
         return Ok(vacancies);
     }
