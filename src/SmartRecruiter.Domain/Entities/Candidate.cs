@@ -15,19 +15,22 @@ public class Candidate
     private readonly List<string> _skills = [];
     public IReadOnlyCollection<string> Skills => _skills.AsReadOnly();
     public Guid JobVacancyId { get; private set; }
+    public string UserId { get; private set; }
     
-    public Candidate(string firstName, string lastName, string email, Guid jobVacancyId)
+    public Candidate(string firstName, string lastName, string email, Guid jobVacancyId, string userId)
     {
         if (string.IsNullOrWhiteSpace(firstName)) throw new ArgumentNullException(nameof(firstName));
         if (string.IsNullOrWhiteSpace(lastName)) throw new ArgumentNullException(nameof(lastName));
         if (string.IsNullOrWhiteSpace(email)) throw new ArgumentNullException(nameof(email));
         if (jobVacancyId == Guid.Empty) throw new ArgumentException("Candidate must be assigned to a vacancy", nameof(jobVacancyId));
+        if (string.IsNullOrWhiteSpace(userId)) throw new ArgumentNullException(nameof(userId));
         Id = Guid.NewGuid();
         FirstName = firstName;
         LastName = lastName;
         Email = email;
         JobVacancyId = jobVacancyId;
         Status = CandidateStatus.Applied;
+        UserId = userId;
     }
 
     public void SetResume(string url)
@@ -85,7 +88,7 @@ public class Candidate
         Status = CandidateStatus.Screening;
     }
 
-    public async void ChangeStatus(CandidateStatus newStatus)
+    public void ChangeStatus(CandidateStatus newStatus)
     {
         Status = newStatus;
     }

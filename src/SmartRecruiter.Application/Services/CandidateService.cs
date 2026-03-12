@@ -45,7 +45,9 @@ public class CandidateService
             firstName,
             lastName,
             request.Email,
-            request.JobVacancyId);
+            request.JobVacancyId,
+            jobVacancy.UserId
+            );
         
         candidate.Evaluate(
             aiResult.Score,
