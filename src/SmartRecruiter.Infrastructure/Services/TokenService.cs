@@ -21,6 +21,7 @@ public class TokenService : ITokenService
     {
         var claims = new List<Claim>
         {
+            new Claim(ClaimTypes.NameIdentifier, user.Id),
             new Claim(ClaimTypes.Name,
                 user.Email), // list of claims(or what is included in this token email, role, other)
             new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
