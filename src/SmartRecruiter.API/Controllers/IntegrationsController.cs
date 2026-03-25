@@ -26,7 +26,7 @@ public class IntegrationsController : ControllerBase
         }
 
         var responseUrl = _authService.GetAuthorizationUrl(userId);
-        return Redirect(responseUrl);
+        return Ok( new {Url = responseUrl});
     }
     [HttpGet("google/callback")]
     public async Task<IActionResult> HandleCallBack(string code, string state)
@@ -37,6 +37,6 @@ public class IntegrationsController : ControllerBase
         }
 
         await _authService.HandleCallbackAsync(code, state);
-        return Ok("Gmail is succesfully connected");
+        return Redirect("http://localhost:5173/?gmail=success");
     }
 }
