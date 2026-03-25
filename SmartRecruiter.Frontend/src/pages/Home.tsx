@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom';
 
 export function Home() {
+
     return (
         <div className="flex h-screen flex-col items-center justify-center bg-gray-50 text-gray-900">
             <h1 className="text-5xl font-bold mb-6">SmartRecruiter AI</h1>
