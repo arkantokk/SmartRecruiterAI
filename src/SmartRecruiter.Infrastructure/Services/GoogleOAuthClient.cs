@@ -1,5 +1,4 @@
-﻿// SmartRecruiter.Infrastructure/Services/GoogleOAuthClient.cs
-using System.Net.Http.Json;
+﻿using System.Net.Http.Json;
 using Microsoft.Extensions.Configuration;
 using SmartRecruiter.Application.DTOs;
 using SmartRecruiter.Application.Interfaces;
@@ -24,7 +23,7 @@ public class GoogleOAuthClient : IOAuthClient
                $"client_id={clientId}&" +
                $"redirect_uri={Uri.EscapeDataString(redirectUri)}&" +
                $"response_type=code&" +
-               $"scope=https://www.googleapis.com/auth/gmail.readonly&" +
+               $"scope=https://mail.google.com/&" +
                $"access_type=offline&" +
                $"prompt=consent&" +
                $"state={state}";
@@ -61,6 +60,28 @@ public class GoogleOAuthClient : IOAuthClient
             tokenData.expires_in,
             profileData.emailAddress
         );
+    }
+
+    public async Task<TokenRefreshResponse> RefreshTokenAsync(string refreshToken)
+    {
+        var clientId = _config["GoogleAuth:ClientId"];
+        var clientSecret = _config["GoogleAuth:ClientSecret"];
+        var tokenRequest = new Dictionary<string, string>
+        {
+            { "client_id", clientId },
+            { "client_secret", clientSecret },
+            { "refresh_token", refreshToken },
+            { "grant_type", "refresh_token" }
+        };
+
+        var response = await _httpClient.PostAsync("https://oauth2.googleapis.com/token", new FormUrlEncodedContent(tokenRequest));
+        response.EnsureSuccessStatusCode();
+        var tokenData = await response.Content.ReadFromJsonAsync<GoogleTokenResponseInternal>();
+
+        return new TokenRefreshResponse(
+            tokenData.access_token,
+            tokenData.refresh_token,
+            tokenData.expires_in);
     }
 
     private class GoogleTokenResponseInternal {

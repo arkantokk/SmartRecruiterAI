@@ -7,4 +7,5 @@ public interface IEmailIntegrationRepository
     Task AddIntegrationAsync(EmailIntegration emailIntegration);
     Task<EmailIntegration?> FindIntegrationAsync(string userId);
     Task UpdateIntegrationAsync(EmailIntegration emailIntegration);
+    Task<List<EmailIntegration>> GetAllIntegrationAsync();
 }
