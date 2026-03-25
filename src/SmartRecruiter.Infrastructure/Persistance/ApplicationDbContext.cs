@@ -15,7 +15,7 @@ public class ApplicationDbContext : IdentityDbContext<IdentityUser>
     
     public DbSet<Candidate> Candidates { get; set; }
     public DbSet<JobVacancy> JobVacancies { get; set; }
-    
+    public DbSet<EmailIntegration> EmailIntegrations { get; set; }
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder); // moved to top to avoid inheritance errors
@@ -40,6 +40,17 @@ public class ApplicationDbContext : IdentityDbContext<IdentityUser>
                         v => JsonSerializer.Serialize(v, (JsonSerializerOptions)null), // C# -> JSON String
                         v => JsonSerializer.Deserialize<List<string>>(v, (JsonSerializerOptions)null)); // JSON String -> C#
             });
+        });
+        modelBuilder.Entity<EmailIntegration>(builder =>
+        {
+            builder.HasKey(e => e.Id);
+            builder.HasOne<IdentityUser>()
+                .WithMany()
+                .HasForeignKey(e => e.UserId)
+                .IsRequired()
+                .OnDelete(DeleteBehavior.Cascade);
+            builder.Property(e => e.Provider).HasMaxLength(50);
+            builder.Property(e => e.ConnectedEmail).HasMaxLength(256);
         });
     }
 }
