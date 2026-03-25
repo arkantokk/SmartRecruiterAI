@@ -48,4 +48,18 @@ public class GmailAuthService : IGmailAuthService
             await _emailIntegrationRepository.UpdateIntegrationAsync(integration);
         }
     }
+
+    public async Task RefreshIntegrationAsync(string userId)
+    {
+        var integration = await _emailIntegrationRepository.FindIntegrationAsync(userId);
+        if (integration == null)
+        {
+            throw new Exception("integration not found");
+        }
+
+        var response = await _authClient.RefreshTokenAsync(integration.RefreshToken);
+        var expiresAt = DateTimeOffset.UtcNow.AddSeconds(response.ExpiresInSeconds);
+        integration.ChangeAccessToken(response.AccessToken, expiresAt, response.RefreshToken);
+        await _emailIntegrationRepository.UpdateIntegrationAsync(integration);
+    }
 }

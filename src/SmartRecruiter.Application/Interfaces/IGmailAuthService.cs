@@ -4,4 +4,5 @@ public interface IGmailAuthService
 {
     string GetAuthorizationUrl(string userId);
     Task HandleCallbackAsync(string code, string userId);
+    Task RefreshIntegrationAsync(string userId);
 }

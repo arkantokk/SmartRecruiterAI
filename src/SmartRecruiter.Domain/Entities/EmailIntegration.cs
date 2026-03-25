@@ -21,10 +21,14 @@ public class EmailIntegration
         AccessTokenExpiresAt = accessTokenExpiresAt;
     }
 
-    public void ChangeAccessToken(string newToken, DateTimeOffset newDate)
+    public void ChangeAccessToken(string newToken, DateTimeOffset newDate, string? refreshToken = null)
     {
         AccessToken = newToken;
         AccessTokenExpiresAt = newDate;
+        if (refreshToken != null)
+        {
+            RefreshToken = refreshToken;
+        }
     }
     
 }
