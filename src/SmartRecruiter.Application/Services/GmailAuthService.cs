@@ -1,4 +1,5 @@
-﻿using SmartRecruiter.Application.Interfaces;
+﻿using SmartRecruiter.Application.DTOs;
+using SmartRecruiter.Application.Interfaces;
 using SmartRecruiter.Domain.Entities;
 using SmartRecruiter.Domain.Interfaces;
 
@@ -17,16 +18,16 @@ public class GmailAuthService : IGmailAuthService
 
     public string GetAuthorizationUrl(string userId)
     {
-       var url =  _authClient.GetAuthorizationUrl(userId);
-       return url;
+        var url = _authClient.GetAuthorizationUrl(userId);
+        return url;
     }
 
     public async Task HandleCallbackAsync(string code, string userId)
     {
         var response = await _authClient.ExchangeCodeAsync(code);
-        
+
         var expiresAt = DateTimeOffset.UtcNow.AddSeconds(response.ExpiresInSeconds);
-        
+
         var integration = await _emailIntegrationRepository.FindIntegrationAsync(userId);
 
         if (integration == null)
@@ -34,7 +35,7 @@ public class GmailAuthService : IGmailAuthService
             var newIntegration = new EmailIntegration(
                 userId,
                 "Google",
-                response.Email,     
+                response.Email,
                 response.AccessToken,
                 response.RefreshToken,
                 expiresAt
@@ -61,5 +62,23 @@ public class GmailAuthService : IGmailAuthService
         var expiresAt = DateTimeOffset.UtcNow.AddSeconds(response.ExpiresInSeconds);
         integration.ChangeAccessToken(response.AccessToken, expiresAt, response.RefreshToken);
         await _emailIntegrationRepository.UpdateIntegrationAsync(integration);
+    }
+
+    public async Task<IntegrationStatusDto> IntegrationStatus(string userId)
+    {
+        var integration = await _emailIntegrationRepository.FindIntegrationAsync(userId);
+
+        if (integration == null)
+        {
+            return new IntegrationStatusDto(
+                false,
+                integration.ConnectedEmail
+                );
+        }
+
+        return new IntegrationStatusDto(
+            true,
+            integration.ConnectedEmail
+            );
     }
 }

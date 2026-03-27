@@ -34,4 +34,9 @@ public class JobVacancyRepository : IJobVacancyRepository
     {
         return await _context.JobVacancies.Where(v => v.UserId == userId).ToListAsync();
     }
+
+    public async Task<JobVacancy?> GetByTitleAndUserIdAsync(string title, string userId)
+    {
+        return await _context.JobVacancies.FirstOrDefaultAsync(v => v.Title.ToLower() == title.ToLower() && v.UserId == userId);
+    }
 }

@@ -10,6 +10,7 @@ namespace SmartRecruiter.API.Controllers;
 public class IntegrationsController : ControllerBase
 {
     private readonly IGmailAuthService _authService;
+
     public IntegrationsController(IGmailAuthService authService)
     {
         _authService = authService;
@@ -19,24 +20,40 @@ public class IntegrationsController : ControllerBase
     [Authorize]
     public IActionResult Connect()
     {
-        var userId =  User.FindFirstValue(ClaimTypes.NameIdentifier);
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
         if (userId == null)
         {
             return Forbid();
         }
 
         var responseUrl = _authService.GetAuthorizationUrl(userId);
-        return Ok( new {Url = responseUrl});
+        return Ok(new { Url = responseUrl });
     }
+
     [HttpGet("google/callback")]
     public async Task<IActionResult> HandleCallBack(string code, string state)
     {
         if (state == null || code == null)
         {
-            return BadRequest();
+            return Redirect("http://localhost:5173/candidates?gmail=failure");
         }
 
         await _authService.HandleCallbackAsync(code, state);
-        return Redirect("http://localhost:5173/?gmail=success");
+        return Redirect("http://localhost:5173/candidates?gmail=success");
+    }
+
+    [HttpGet("google/status")]
+    [Authorize]
+    public async Task<IActionResult> CheckStatus()
+    {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (userId == null)
+        {
+            return Forbid();
+        }
+
+        var status = await _authService.IntegrationStatus(userId);
+        
+        return Ok(status);
     }
 }
