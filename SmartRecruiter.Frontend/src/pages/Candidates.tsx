@@ -4,6 +4,7 @@ import { useSearchParams } from "react-router-dom";
 import { useEffect } from "react";
 import { useIntegrationStatus } from "../features/integrations/hooks/useIntegrationStatus.ts";
 import {CandidatesList} from "../components/CandidatesList.tsx";
+import {Vacancies} from "../components/Vacancies.tsx";
 
 export const Candidates = () => {
     const [params, setParams] = useSearchParams();
@@ -59,6 +60,8 @@ export const Candidates = () => {
                 )
 
                 }
+
+                <Vacancies/>
             </main>
         </div>
     );

@@ -9,10 +9,6 @@ export interface Candidate {
 }
 
 export const candidatesService = {
-    getAll: async () => {
-        const response = await apiClient.get<Candidate[]>("Candidates");
-        return response.data;
-    },
     getCandidates: async () => {
         const response = await apiClient.get<Candidate[]>("Candidates");
         return response.data;
