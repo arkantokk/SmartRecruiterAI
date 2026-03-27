@@ -43,6 +43,8 @@ function App() {
                     }
                 />
 
+
+
                 <Route
                     path="/candidates"
                     element={
