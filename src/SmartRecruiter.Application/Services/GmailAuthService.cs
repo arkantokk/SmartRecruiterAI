@@ -72,7 +72,7 @@ public class GmailAuthService : IGmailAuthService
         {
             return new IntegrationStatusDto(
                 false,
-                integration.ConnectedEmail
+                null
                 );
         }
 
