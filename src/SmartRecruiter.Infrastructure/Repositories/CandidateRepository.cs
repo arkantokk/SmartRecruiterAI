@@ -46,4 +46,9 @@ public class CandidateRepository : ICandidateRepository
         candidate.ChangeStatus(newStatus);
         await _context.SaveChangesAsync();
     }
+
+    public async Task<IEnumerable<Candidate>> GetAllCandidatesByVacancyIdAsync(Guid vacancyId)
+    {
+        return await _context.Candidates.Where(с => с.JobVacancyId == vacancyId).ToListAsync<Candidate>();
+    }
 }

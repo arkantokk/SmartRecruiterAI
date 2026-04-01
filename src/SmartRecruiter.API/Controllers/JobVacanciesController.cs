@@ -11,10 +11,12 @@ namespace SmartRecruiter.API.Controllers;
 public class JobVacanciesController : ControllerBase
 {
     private readonly JobVacancyService _jobVacancyService;
+    private readonly CandidateService _candidateService;
 
-    public JobVacanciesController(JobVacancyService jobVacancyService)
+    public JobVacanciesController(JobVacancyService jobVacancyService, CandidateService candidateService)
     {
         _jobVacancyService = jobVacancyService;
+        _candidateService = candidateService;
     }
 
     [HttpPost]
@@ -37,4 +39,13 @@ public class JobVacanciesController : ControllerBase
         var vacancies = await _jobVacancyService.GetUserVacanciesAsync(userId);
         return Ok(vacancies);
     }
+    
+    [HttpGet("{id:guid}/candidates")]
+    public async Task<IActionResult> GetCandidatesByVacancyId(Guid id)
+    {
+        var candidates = await _candidateService.GetAllCandidatesByVacancyIdAsync(id);
+        return Ok(candidates);
+    }
+    
+    
 }
