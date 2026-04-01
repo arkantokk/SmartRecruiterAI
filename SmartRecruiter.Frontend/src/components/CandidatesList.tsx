@@ -67,7 +67,7 @@ export const CandidatesList = ({ onSelect }: Props) => {
                         </div>
                     </div>
                     <div className="flex items-center gap-4">
-                        <span className="px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider bg-gray-100 text-gray-600">
+                        <span className={`px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider ${candidate.status == "Rejected" ? 'bg-red-500' : candidate.status == "Hired" ? 'bg-green-400' : 'bg-amber-50'} candi text-gray-600`} >
                             {candidate.status}
                         </span>
                         <ChevronRight className="text-gray-300 group-hover:text-blue-400 transition-colors" />

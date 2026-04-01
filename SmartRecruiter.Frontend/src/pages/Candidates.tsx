@@ -128,7 +128,7 @@ export const Candidates = () => {
                             </section>
 
                             <section className="bg-white rounded-3xl p-6 shadow-sm border border-gray-100">
-                                <h3 className="text-lg font-bold text-gray-900 mb-6 flex items-center justify-between">
+                                <h3 className="text-lg font-bold text-gray-900 mb-6 flex items-center justify-between ">
                                     <span className="flex items-center gap-2"><Briefcase size={20} className="text-blue-600" /> Active Roles</span>
                                     <span className="text-xs bg-gray-100 px-2 py-1 rounded-lg text-gray-500 font-black">{vacancies?.length || 0}</span>
                                 </h3>
@@ -140,7 +140,7 @@ export const Candidates = () => {
                                         </div>
                                     ) : vacancies?.map((v) => (
                                         <Link key={v.id} to={`/vacancies/${v.id}`}>
-                                            <div className="p-4 bg-gray-50 rounded-2xl border border-transparent hover:border-blue-100 hover:bg-white transition-all cursor-pointer group">
+                                            <div className="p-4 my-2 bg-gray-50 rounded-2xl border border-transparent hover:border-blue-100 hover:bg-white transition-all cursor-pointer group">
                                                 <div className="font-bold text-gray-900 group-hover:text-blue-600 transition-colors">
                                                     {v.title}
                                                 </div>
