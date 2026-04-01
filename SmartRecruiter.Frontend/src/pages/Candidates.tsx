@@ -1,68 +1,179 @@
-import Header from "../components/Header";
-import { integrationService } from "../features/integrations/integrationService.ts";
+import { useState, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
-import { useEffect } from "react";
-import { useIntegrationStatus } from "../features/integrations/hooks/useIntegrationStatus.ts";
-import {CandidatesList} from "../components/CandidatesList.tsx";
-import {Vacancies} from "../components/Vacancies.tsx";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import Header from "../components/Header";
+import { CandidatesList } from "../components/CandidatesList";
+import { CandidateDetails } from "../components/CandidateDetails";
+import { useIntegrationStatus } from "../features/integrations/hooks/useIntegrationStatus";
+import { integrationService } from "../features/integrations/integrationService";
+import { vacanciesService } from "../features/vacancies/vacanciesService";
+import {
+    MailWarning,
+    Plus,
+    Briefcase,
+    Sparkles,
+    Search,
+    ListFilter
+} from "lucide-react";
+import type { Candidate } from "../features/candidates/candidatesService";
 
 export const Candidates = () => {
+    const queryClient = useQueryClient();
     const [params, setParams] = useSearchParams();
-    const { data, isLoading, isError, error } = useIntegrationStatus();
+    const [selectedCandidate, setSelectedCandidate] = useState<Candidate | null>(null);
 
+    const [vTitle, setVTitle] = useState("");
+    const [vPrompt, setVPrompt] = useState("");
 
-    const handleConnectGmail = async () => {
-        await integrationService.connectGmail();
-    };
+    const { data: integration, isLoading: isStatusLoading } = useIntegrationStatus();
+
+    const { data: vacancies, isLoading: isVacanciesLoading } = useQuery({
+        queryKey: ['vacancies'],
+        queryFn: vacanciesService.getVacancies,
+        enabled: !!integration?.isConnected
+    });
+
+    const { mutate: createVacancy, isPending: isCreatingVacancy } = useMutation({
+        mutationFn: vacanciesService.postVacancy,
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['vacancies'] });
+            setVTitle("");
+            setVPrompt("");
+        }
+    });
 
     useEffect(() => {
-        const result = params.get("gmail");
-        if (result === "success") {
+        if (params.get("gmail") === "success") {
             params.delete("gmail");
             setParams(params, { replace: true });
         }
     }, [params, setParams]);
 
+    const handleConnect = async () => {
+        await integrationService.connectGmail();
+    };
+
+    const handleVacancySubmit = (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!vTitle.trim() || !vPrompt.trim()) return;
+        createVacancy({ title: vTitle, aiPromptTemplate: vPrompt });
+    };
+
     return (
-        <div className="min-h-screen bg-gray-50">
+        <div className="min-h-screen bg-[#F8FAFC]">
             <Header />
 
-            <main className="p-8 flex flex-col items-start gap-4">
-                {isError ? (
-                    <div className="text-red-500 font-medium">
-                        Error: {error instanceof Error ? error.message : "Can't connect to the server"}
+            <main className="max-w-[1600px] mx-auto px-6 py-10">
+                <div className="flex justify-between items-center mb-10">
+                    <div>
+                        <h1 className="text-4xl font-black text-gray-900 tracking-tight">Recruitment Dashboard</h1>
+                        <p className="text-gray-500 mt-2 flex items-center gap-2 font-medium">
+                            <Sparkles size={18} className="text-blue-500" /> AI-powered candidate sourcing and evaluation
+                        </p>
                     </div>
-                ) : isLoading ? (
-                    <div role="status">
-                        <svg aria-hidden="true" className="w-12 h-12 text-gray-200 animate-spin fill-blue-600"
-                             viewBox="0 0 100 101" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M100 50.5908C100 78.2051 77.6142 100.591 50 100.591C22.3858 100.591 0 78.2051 0 50.5908C0 22.9766 22.3858 0.59082 50 0.59082C77.6142 0.59082 100 22.9766 100 50.5908ZM9.08144 50.5908C9.08144 73.1895 27.4013 91.5094 50 91.5094C72.5987 91.5094 90.9186 73.1895 90.9186 50.5908C90.9186 27.9921 72.5987 9.67226 50 9.67226C27.4013 9.67226 9.08144 27.9921 9.08144 50.5908Z" fill="currentColor" />
-                            <path d="M93.9676 39.0409C96.393 38.4038 97.8624 35.9116 97.0079 33.5539C95.2932 28.8227 92.871 24.3692 89.8167 20.348C85.8452 15.1192 80.8826 10.7238 75.2124 7.41289C69.5422 4.10194 63.2754 1.94025 56.7698 1.05124C51.7666 0.367541 46.6976 0.446843 41.7345 1.27873C39.2613 1.69328 37.813 4.19778 38.4501 6.62326C39.0873 9.04874 41.5694 10.4717 44.0505 10.1071C47.8511 9.54855 51.7191 9.52689 55.5402 10.0491C60.8642 10.7766 65.9928 12.5457 70.6331 15.2552C75.2735 17.9648 79.3347 21.5619 82.5849 25.841C84.9175 28.9121 86.7997 32.2913 88.1811 35.8758C89.083 38.2158 91.5421 39.6781 93.9676 39.0409Z" fill="currentFill" />
-                        </svg>
-                        <span className="sr-only">Loading...</span>
-                    </div>
-                ) : data?.isConnected == false ? (
-                    <>
-                        <button
-                            onClick={handleConnectGmail}
-                            className="bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded transition-colors"
-                        >
-                            Connect Gmail
-                        </button>
+                </div>
 
-                        <div className="mt-2 text-gray-700">
-                            Status: {data?.isConnected ? "Connected" : "Not connected"}
+                {isStatusLoading ? (
+                    <div className="flex justify-center py-20">
+                        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600"></div>
+                    </div>
+                ) : !integration?.isConnected ? (
+                    <div className="bg-white rounded-3xl p-12 shadow-sm border border-gray-100 text-center max-w-2xl mx-auto mt-10">
+                        <div className="w-20 h-20 bg-amber-50 rounded-2xl flex items-center justify-center mx-auto mb-6">
+                            <MailWarning className="text-amber-500" size={40} />
                         </div>
-                    </>
-                ) : (<>
-                        <CandidatesList/>
-                </>
-                )
+                        <h2 className="text-2xl font-bold text-gray-900">Email Integration Required</h2>
+                        <p className="text-gray-500 mt-3 mb-8 text-lg font-medium">
+                            Connect your Gmail to start receiving and analyzing candidate resumes.
+                        </p>
+                        <button
+                            onClick={handleConnect}
+                            className="bg-blue-600 text-white px-8 py-4 rounded-2xl font-bold text-lg hover:bg-blue-700 transition-all shadow-lg shadow-blue-100"
+                        >
+                            Connect Google Account
+                        </button>
+                    </div>
+                ) : (
+                    <div className="grid grid-cols-12 gap-8 items-start">
 
-                }
+                        <div className="col-span-12 lg:col-span-4 space-y-6">
+                            <section className="bg-white rounded-3xl p-6 shadow-sm border border-gray-100">
+                                <h3 className="text-lg font-bold text-gray-900 mb-6 flex items-center gap-2">
+                                    <Plus size={20} className="text-blue-600" /> Create Vacancy
+                                </h3>
+                                <form onSubmit={handleVacancySubmit} className="space-y-4">
+                                    <input
+                                        type="text"
+                                        placeholder="Position Title"
+                                        value={vTitle}
+                                        onChange={(e) => setVTitle(e.target.value)}
+                                        className="w-full bg-gray-50 border-none rounded-xl px-4 py-3 focus:ring-2 focus:ring-blue-500 font-medium"
+                                        required
+                                    />
+                                    <textarea
+                                        placeholder="AI Evaluation Prompt..."
+                                        value={vPrompt}
+                                        onChange={(e) => setVPrompt(e.target.value)}
+                                        className="w-full bg-gray-50 border-none rounded-xl px-4 py-3 h-32 focus:ring-2 focus:ring-blue-500 font-medium text-sm"
+                                        required
+                                    />
+                                    <button
+                                        type="submit"
+                                        disabled={isCreatingVacancy}
+                                        className="w-full bg-gray-900 text-white py-3 rounded-xl font-bold hover:bg-gray-800 transition-all disabled:bg-gray-400"
+                                    >
+                                        {isCreatingVacancy ? "Creating..." : "Add Opening"}
+                                    </button>
+                                </form>
+                            </section>
 
-                <Vacancies/>
+                            <section className="bg-white rounded-3xl p-6 shadow-sm border border-gray-100">
+                                <h3 className="text-lg font-bold text-gray-900 mb-6 flex items-center justify-between">
+                                    <span className="flex items-center gap-2"><Briefcase size={20} className="text-blue-600" /> Active Roles</span>
+                                    <span className="text-xs bg-gray-100 px-2 py-1 rounded-lg text-gray-500 font-black">{vacancies?.length || 0}</span>
+                                </h3>
+                                <div className="space-y-3 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar">
+                                    {isVacanciesLoading ? (
+                                        <div className="animate-pulse space-y-2">
+                                            <div className="h-12 bg-gray-100 rounded-xl w-full"></div>
+                                            <div className="h-12 bg-gray-100 rounded-xl w-full"></div>
+                                        </div>
+                                    ) : vacancies?.map((v) => (
+                                        <div key={v.id} className="p-4 bg-gray-50 rounded-2xl border border-transparent hover:border-blue-100 hover:bg-white transition-all cursor-pointer group">
+                                            <div className="font-bold text-gray-900 group-hover:text-blue-600 transition-colors">{v.title}</div>
+                                            <div className="text-[10px] text-gray-400 font-black uppercase mt-1 tracking-widest">{v.id.slice(0,8)}</div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </section>
+                        </div>
+
+                        <div className="col-span-12 lg:col-span-8 space-y-6">
+                            <div className="bg-white p-4 rounded-2xl border border-gray-100 shadow-sm flex items-center gap-4">
+                                <div className="flex-1 flex items-center gap-3 px-3">
+                                    <Search size={18} className="text-gray-400" />
+                                    <input
+                                        type="text"
+                                        placeholder="Search candidates by name, email or skills..."
+                                        className="w-full border-none focus:ring-0 font-medium text-gray-600 placeholder:text-gray-400"
+                                    />
+                                </div>
+                                <div className="h-8 w-px bg-gray-100" />
+                                <button className="flex items-center gap-2 text-gray-500 font-bold text-sm px-4 py-2 hover:bg-gray-50 rounded-xl transition-all">
+                                    <ListFilter size={18} /> Filters
+                                </button>
+                            </div>
+
+                            <CandidatesList onSelect={setSelectedCandidate} />
+                        </div>
+                    </div>
+                )}
             </main>
+
+            <CandidateDetails
+                candidate={selectedCandidate}
+                onClose={() => setSelectedCandidate(null)}
+            />
         </div>
     );
 };

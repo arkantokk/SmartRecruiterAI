@@ -33,110 +33,129 @@ public class EmailBackgroundWorker : BackgroundService
 
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
+        Console.WriteLine($"[{DateTime.Now:HH:mm:ss}] Worker initialized.");
+
         while (!stoppingToken.IsCancellationRequested)
         {
             try
             {
                 using (var scope = _scopeFactory.CreateScope())
                 {
-                    var emailIntegrationRepository = scope.ServiceProvider.GetRequiredService<IEmailIntegrationRepository>();
-                    var gmailAuthService = scope.ServiceProvider.GetRequiredService<IGmailAuthService>();
+                    var emailRepo = scope.ServiceProvider.GetRequiredService<IEmailIntegrationRepository>();
+                    var authService = scope.ServiceProvider.GetRequiredService<IGmailAuthService>();
                     var candidateService = scope.ServiceProvider.GetRequiredService<CandidateService>();
                     var parsingService = scope.ServiceProvider.GetRequiredService<IFileParsingService>();
-                    var vacancyRepository = scope.ServiceProvider.GetRequiredService<IJobVacancyRepository>();
+                    var vacancyRepo = scope.ServiceProvider.GetRequiredService<IJobVacancyRepository>();
 
-                    var integrations = await emailIntegrationRepository.GetAllIntegrationAsync();
+                    var integrations = await emailRepo.GetAllIntegrationAsync();
 
                     foreach (var integration in integrations)
                     {
-                        var currentIntegration = integration; 
-
-                        if (currentIntegration.AccessTokenExpiresAt < DateTimeOffset.UtcNow.AddMinutes(2))
+                        var current = integration;
+                        
+                        try 
                         {
-                            await gmailAuthService.RefreshIntegrationAsync(currentIntegration.UserId);
-                            currentIntegration = (await emailIntegrationRepository.FindIntegrationAsync(currentIntegration.UserId))!;
-                        }
+                            Console.WriteLine($"\n[ACCOUNT] Processing: {current.ConnectedEmail}");
 
-                        using (var client = new ImapClient())
-                        {
-                            client.Timeout = 20000; 
-                            await client.ConnectAsync(MailServer, MailPort, true, stoppingToken);
-
-                            var oauth2 = new SaslMechanismOAuth2(currentIntegration.ConnectedEmail, currentIntegration.AccessToken);
-                            await client.AuthenticateAsync(oauth2, stoppingToken);
-
-                            var inbox = client.Inbox;
-                            await inbox.OpenAsync(FolderAccess.ReadWrite, stoppingToken);
-
-                            var uids = await inbox.SearchAsync(SearchQuery.NotSeen, stoppingToken);
-
-                            foreach (var uid in uids)
+                            if (current.AccessTokenExpiresAt < DateTimeOffset.UtcNow.AddMinutes(2))
                             {
-                                var message = await inbox.GetMessageAsync(uid, stoppingToken);
+                                Console.WriteLine($"[AUTH] Refreshing: {current.ConnectedEmail}");
+                                await authService.RefreshIntegrationAsync(current.UserId);
+                                current = (await emailRepo.FindIntegrationAsync(current.UserId))!;
+                            }
+
+                            using (var client = new ImapClient())
+                            {
+                                await client.ConnectAsync(MailServer, MailPort, true, stoppingToken);
+                                var oauth2 = new SaslMechanismOAuth2(current.ConnectedEmail, current.AccessToken);
                                 
-                                await inbox.AddFlagsAsync(uid, MessageFlags.Seen, true, stoppingToken);
-                                
-                                var subject = message.Subject?.Trim() ?? "";
-                                
-                                var vacancy = await vacancyRepository.GetByTitleAndUserIdAsync(subject, currentIntegration.UserId);
-                                if (vacancy == null)
+                                try 
                                 {
-                                    continue; 
+                                    await client.AuthenticateAsync(oauth2, stoppingToken);
+                                }
+                                catch (AuthenticationException)
+                                {
+                                    Console.WriteLine($"[AUTH] Forced refresh for {current.ConnectedEmail}...");
+                                    await authService.RefreshIntegrationAsync(current.UserId);
+                                    current = (await emailRepo.FindIntegrationAsync(current.UserId))!;
+                                    oauth2 = new SaslMechanismOAuth2(current.ConnectedEmail, current.AccessToken);
+                                    await client.AuthenticateAsync(oauth2, stoppingToken);
                                 }
 
-                                var fullDossier = new StringBuilder();
-                                fullDossier.AppendLine("=== EMAIL BODY ===");
-                                fullDossier.AppendLine(message.TextBody ?? string.Empty);
-
-                                bool hasPdf = false;
-                                string? resumeUrl = null;
-
-                                foreach (var attachment in message.Attachments)
+                                var inbox = client.Inbox;
+                                await inbox.OpenAsync(FolderAccess.ReadWrite, stoppingToken);
+                                var uids = await inbox.SearchAsync(SearchQuery.NotSeen, stoppingToken);
+                                
+                                if (uids.Count > 0)
                                 {
-                                    if (attachment is MimePart part && part.FileName.ToLower().EndsWith(".pdf"))
+                                    Console.WriteLine($"[IMAP] {current.ConnectedEmail}: {uids.Count} new emails.");
+                                    var summaries = await inbox.FetchAsync(uids, MessageSummaryItems.Envelope | MessageSummaryItems.UniqueId, stoppingToken);
+                                    var userVacancies = await vacancyRepo.GetUserVacancies(current.UserId);
+
+                                    foreach (var summary in summaries)
                                     {
-                                        using (var stream = new MemoryStream())
+                                        var uid = summary.UniqueId;
+                                        var subject = summary.Envelope.Subject?.Trim() ?? "";
+                                        await inbox.AddFlagsAsync(uid, MessageFlags.Seen, true, stoppingToken);
+                                        
+                                        var vacancy = userVacancies.FirstOrDefault(v => 
+                                            subject.ToLower().Contains(v.Title.ToLower().Trim()));
+
+                                        if (vacancy == null) continue;
+
+                                        var message = await inbox.GetMessageAsync(uid, stoppingToken);
+                                        var fullDossier = new StringBuilder();
+                                        fullDossier.AppendLine(message.TextBody ?? string.Empty);
+                                        bool hasPdf = false; string? resumeUrl = null;
+
+                                        foreach (var attachment in message.Attachments)
                                         {
-                                            await part.Content.DecodeToAsync(stream, stoppingToken);
-                                            stream.Position = 0;
-                                            
-                                            var text = await parsingService.ExtractTextAsync(stream);
-                                            fullDossier.AppendLine($"--- FILE: {part.FileName} ---");
-                                            fullDossier.AppendLine(text);
-                                            
-                                            stream.Position = 0;
-                                            resumeUrl = await _storageService.UploadAsync(stream, part.FileName, "application/pdf");
-                                            hasPdf = true;
+                                            if (attachment is MimePart part && part.FileName.ToLower().EndsWith(".pdf"))
+                                            {
+                                                using (var stream = new MemoryStream())
+                                                {
+                                                    await part.Content.DecodeToAsync(stream, stoppingToken);
+                                                    stream.Position = 0;
+                                                    var text = await parsingService.ExtractTextAsync(stream);
+                                                    fullDossier.AppendLine(text);
+                                                    stream.Position = 0;
+                                                    resumeUrl = await _storageService.UploadAsync(stream, part.FileName, "application/pdf");
+                                                    hasPdf = true;
+                                                }
+                                            }
+                                        }
+
+                                        if (hasPdf || fullDossier.Length > 100)
+                                        {
+                                            var request = new CreateCandidateRequest
+                                            {
+                                                FirstName = message.From.Mailboxes.FirstOrDefault()?.Name ?? "Unknown",
+                                                LastName = "Candidate",
+                                                Email = message.From.Mailboxes.FirstOrDefault()?.Address ?? "no-email",
+                                                JobVacancyId = vacancy.Id,
+                                                ResumeText = fullDossier.ToString(),
+                                                ResumeUrl = resumeUrl
+                                            };
+                                            await candidateService.RegisterCandidateAsync(request);
+                                            Console.WriteLine($"[SUCCESS] Registered: {request.Email}");
                                         }
                                     }
                                 }
-
-                                if (hasPdf || fullDossier.Length > 100)
-                                {
-                                    var request = new CreateCandidateRequest
-                                    {
-                                        FirstName = message.From.Mailboxes.FirstOrDefault()?.Name ?? "Unknown",
-                                        LastName = "Candidate",
-                                        Email = message.From.Mailboxes.FirstOrDefault()?.Address ?? "no-email",
-                                        JobVacancyId = vacancy.Id,
-                                        ResumeText = fullDossier.ToString(),
-                                        ResumeUrl = resumeUrl
-                                    };
-
-                                    await candidateService.RegisterCandidateAsync(request);
-                                }
+                                await client.DisconnectAsync(true, stoppingToken);
                             }
-
-                            await client.DisconnectAsync(true, stoppingToken);
                         }
-                    } 
-                } 
+                        catch (Exception ex)
+                        {
+                            Console.WriteLine($"[ERROR] Skipping {current.ConnectedEmail} due to: {ex.Message}");
+                            
+                        }
+                    }
+                }
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Background worker error occurred.");
+                _logger.LogError(ex, "Global worker loop error.");
             }
-
             await Task.Delay(TimeSpan.FromSeconds(30), stoppingToken);
         }
     }
