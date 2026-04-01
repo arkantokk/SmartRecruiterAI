@@ -45,4 +45,21 @@ public class JobVacancyService
         
         await _jobVacancyRepository.UpdateJobVacancyAsync(vacancy);
     }
+
+    public async Task<JobVacancyResponse> GetVacancyByIdAsync(Guid id, string userId)
+    {
+        var vacancy = await _jobVacancyRepository.GetByIdAsync(id);
+        
+        if (vacancy == null)
+        {
+            throw new KeyNotFoundException($"Vacancy with ID {id} not found");
+        }
+        
+        if (vacancy.UserId != userId)
+        {
+            throw new UnauthorizedAccessException("You don't have permission to edit this vacancy.");
+        }
+
+        return new JobVacancyResponse(id, vacancy.Title, vacancy.AiPromptTemplate);
+    }
 }

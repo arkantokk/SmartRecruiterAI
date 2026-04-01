@@ -4,6 +4,7 @@ public enum CandidateStatus
 {
     Applied,
     Screening,
+    ManualReview,
     Interview,
     Offer,
     Rejected,

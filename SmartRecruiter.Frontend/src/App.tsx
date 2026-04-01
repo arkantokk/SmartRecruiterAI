@@ -4,6 +4,7 @@ import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import LoginForm from "./features/auth/components/LoginForm";
 import RegisterForm from "./features/auth/components/RegisterForm";
 import Candidates from "./pages/Candidates";
+import {VacancyDetails} from "./pages/VacancyDetails.tsx";
 
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
     const token = localStorage.getItem("token");
@@ -43,8 +44,6 @@ function App() {
                     }
                 />
 
-
-
                 <Route
                     path="/candidates"
                     element={
@@ -54,6 +53,14 @@ function App() {
                     }
                 />
 
+                <Route
+                    path="/vacancies/:id"
+                    element={
+                        <ProtectedRoute>
+                            <VacancyDetails/>
+                        </ProtectedRoute>
+                    }
+                />
                 <Route path="*" element={<Navigate to="/candidates" replace />} />
             </Routes>
         </BrowserRouter>
