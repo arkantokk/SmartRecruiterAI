@@ -1,5 +1,6 @@
 ﻿using System.Net.Http.Json;
 using Microsoft.Extensions.Configuration;
+using Microsoft.IdentityModel.Tokens;
 using SmartRecruiter.Application.DTOs;
 using SmartRecruiter.Application.Interfaces;
 
@@ -77,7 +78,12 @@ public class GoogleOAuthClient : IOAuthClient
         var response = await _httpClient.PostAsync("https://oauth2.googleapis.com/token", new FormUrlEncodedContent(tokenRequest));
         response.EnsureSuccessStatusCode();
         var tokenData = await response.Content.ReadFromJsonAsync<GoogleTokenResponseInternal>();
-
+        if (tokenData.refresh_token.IsNullOrEmpty())
+        {
+            return new TokenRefreshResponse(tokenData.access_token,
+                refreshToken,
+                tokenData.expires_in);
+        }
         return new TokenRefreshResponse(
             tokenData.access_token,
             tokenData.refresh_token,
