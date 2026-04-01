@@ -17,7 +17,7 @@ public class CandidateService
         IAiService aiService,
         IJobVacancyRepository jobVacancyRepository,
         IStorageService storageService
-        )
+    )
     {
         _repository = repository;
         _aiService = aiService;
@@ -47,8 +47,8 @@ public class CandidateService
             request.Email,
             request.JobVacancyId,
             jobVacancy.UserId
-            );
-        
+        );
+
         candidate.Evaluate(
             aiResult.Score,
             aiResult.Summary,
@@ -59,6 +59,7 @@ public class CandidateService
         {
             candidate.SetResume(request.ResumeUrl);
         }
+
         await _repository.AddAsync(candidate);
 
         return candidate.Id;
@@ -104,5 +105,23 @@ public class CandidateService
     public async Task UpdateStatusAsync(Guid id, CandidateStatus newStatus)
     {
         await _repository.UpdateStatusAsync(id, newStatus);
+    }
+
+    public async Task<IEnumerable<CandidateDto>> GetAllCandidatesByVacancyIdAsync(Guid jobVacancyId)
+    {
+        var candidates = await _repository.GetAllCandidatesByVacancyIdAsync(jobVacancyId);
+
+        return candidates
+            .OrderByDescending(c => c.Evaluation?.Score ?? 0)
+            .Select(c => new CandidateDto(
+                c.Id,
+                c.FirstName,
+                c.LastName,
+                c.Email,
+                c.ResumeUrl != null ? _storageService.GenerateReadOnlyUrl(c.ResumeUrl, TimeSpan.FromHours(1)) : null,
+                c.Evaluation?.Score ?? 0,
+                c.Evaluation?.Summary ?? string.Empty,
+                c.Evaluation?.Skills ?? new List<string>(),
+                c.Status.ToString()));
     }
 }

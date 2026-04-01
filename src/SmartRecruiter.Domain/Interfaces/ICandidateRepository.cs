@@ -10,4 +10,5 @@ public interface ICandidateRepository
     Task<IEnumerable<Candidate>> GetAllCandidatesAsync();
     Task<IEnumerable<Candidate>> GetCandidatesByUserIdAsync(string userId);
     Task UpdateStatusAsync(Guid id, CandidateStatus newStatus);
+    Task<IEnumerable<Candidate>> GetAllCandidatesByVacancyIdAsync(Guid vacancyId);
 }

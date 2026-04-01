@@ -79,4 +79,6 @@ public class CandidatesController : ControllerBase
             await _candidateService.UpdateStatusAsync(id, newStatus);
             return NoContent();
     }
+
+    
 }
