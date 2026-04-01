@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useSearchParams } from "react-router-dom";
+import {Link, useSearchParams} from "react-router-dom";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import Header from "../components/Header";
 import { CandidatesList } from "../components/CandidatesList";
@@ -139,10 +139,16 @@ export const Candidates = () => {
                                             <div className="h-12 bg-gray-100 rounded-xl w-full"></div>
                                         </div>
                                     ) : vacancies?.map((v) => (
-                                        <div key={v.id} className="p-4 bg-gray-50 rounded-2xl border border-transparent hover:border-blue-100 hover:bg-white transition-all cursor-pointer group">
-                                            <div className="font-bold text-gray-900 group-hover:text-blue-600 transition-colors">{v.title}</div>
-                                            <div className="text-[10px] text-gray-400 font-black uppercase mt-1 tracking-widest">{v.id.slice(0,8)}</div>
-                                        </div>
+                                        <Link key={v.id} to={`/vacancies/${v.id}`}>
+                                            <div className="p-4 bg-gray-50 rounded-2xl border border-transparent hover:border-blue-100 hover:bg-white transition-all cursor-pointer group">
+                                                <div className="font-bold text-gray-900 group-hover:text-blue-600 transition-colors">
+                                                    {v.title}
+                                                </div>
+                                                <div className="text-[10px] text-gray-400 font-black uppercase mt-1 tracking-widest">
+                                                    {v.id.slice(0, 8)}
+                                                </div>
+                                            </div>
+                                        </Link>
                                     ))}
                                 </div>
                             </section>

@@ -10,5 +10,10 @@ export const vacanciesService = {
     getVacancies: async () => {
         const response = await apiClient.get<JobVacancyResponse[]>('/JobVacancies');
         return response.data;
-    }
+    },
+    getVacancyById: async (jobVacancyId: string) => {
+        const response = await apiClient.get<JobVacancyResponse>(`/JobVacancies/${jobVacancyId}`);
+        return response.data;
+    },
+
 }

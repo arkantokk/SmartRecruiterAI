@@ -39,6 +39,15 @@ public class JobVacanciesController : ControllerBase
         var vacancies = await _jobVacancyService.GetUserVacanciesAsync(userId);
         return Ok(vacancies);
     }
+
+    [HttpGet("{id:guid}")]
+    public async Task<IActionResult> GetVacancyById(Guid id)
+    {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (userId == null) return Unauthorized();
+        var vacancy = await _jobVacancyService.GetVacancyByIdAsync(id, userId);
+        return Ok(vacancy);
+    }
     
     [HttpGet("{id:guid}/candidates")]
     public async Task<IActionResult> GetCandidatesByVacancyId(Guid id)
