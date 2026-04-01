@@ -9,4 +9,5 @@ public interface IJobVacancyRepository
     Task<JobVacancy?> GetByTitleAsync(string title); // needs to be removed or used differently because of risk when checking two emails with same job title
     Task<JobVacancy?> GetByTitleAndUserIdAsync(string title, string userId);
     Task<IEnumerable<JobVacancy>> GetUserVacancies(string userId);
+    Task UpdateJobVacancyAsync(JobVacancy jobVacancy);
 }

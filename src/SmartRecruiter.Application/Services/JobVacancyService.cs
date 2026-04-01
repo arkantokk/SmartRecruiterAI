@@ -26,4 +26,23 @@ public class JobVacancyService
         var vacancies = await _jobVacancyRepository.GetUserVacancies(userId);
         return vacancies;
     }
+
+    public async Task UpdateVacancyAsync(Guid id,string userId, UpdateJobVacancyRequest jobVacancyRequest)
+    {
+        var vacancy = await _jobVacancyRepository.GetByIdAsync(id);
+        
+        if (vacancy == null)
+        {
+            throw new KeyNotFoundException($"Vacancy with ID {id} not found");
+        }
+        
+        if (vacancy.UserId != userId)
+        {
+            throw new UnauthorizedAccessException("You don't have permission to edit this vacancy.");
+        }
+        
+        vacancy.UpdateJobVacancy(jobVacancyRequest.Title, jobVacancyRequest.AiPromptTemplate);
+        
+        await _jobVacancyRepository.UpdateJobVacancyAsync(vacancy);
+    }
 }
