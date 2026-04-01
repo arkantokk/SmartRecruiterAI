@@ -17,9 +17,12 @@ public class JobVacancy
         UserId = userId;
     }
 
-    public void UpdateAiPrompt(string newTemplate)
+    public void UpdateJobVacancy(string title, string newTemplate)
     {
+        if (string.IsNullOrWhiteSpace(title)) 
+            throw new ArgumentException("Title cannot be empty");
         if (string.IsNullOrWhiteSpace(newTemplate)) throw new ArgumentNullException(nameof(newTemplate));
+        Title = title;
         AiPromptTemplate = newTemplate;
     }
 }

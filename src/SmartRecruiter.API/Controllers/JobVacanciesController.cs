@@ -46,6 +46,25 @@ public class JobVacanciesController : ControllerBase
         var candidates = await _candidateService.GetAllCandidatesByVacancyIdAsync(id);
         return Ok(candidates);
     }
-    
-    
+
+    [HttpPatch("{id:guid}")]
+    public async Task<IActionResult> UpdateJobVacancy(Guid id, [FromBody] UpdateJobVacancyRequest request)
+    {
+        var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        if (userId == null) return Unauthorized();
+
+        try 
+        {
+            await _jobVacancyService.UpdateVacancyAsync(id, userId, request);
+            return NoContent();
+        }
+        catch (KeyNotFoundException)
+        {
+            return NotFound();
+        }
+        catch (UnauthorizedAccessException ex)
+        {
+            return Forbid(ex.Message);
+        }
+    }
 }
