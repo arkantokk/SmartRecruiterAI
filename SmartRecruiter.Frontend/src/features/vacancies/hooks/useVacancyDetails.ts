@@ -32,3 +32,15 @@ export const useUpdateCandidateStatus = (vacancyId: string | null | undefined) =
         }
     });
 };
+
+export const useUpdateVacancy = (id: string | null | undefined) => {
+    const queryClient = useQueryClient();
+
+    return useMutation({
+        mutationFn: (data: { title: string; aiPromptTemplate: string }) =>
+            vacanciesService.updateJobVacancy(id as string, data),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ["vacancy", id] });
+        }
+    });
+};

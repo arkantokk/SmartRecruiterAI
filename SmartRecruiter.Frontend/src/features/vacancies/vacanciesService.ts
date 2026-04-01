@@ -15,5 +15,8 @@ export const vacanciesService = {
         const response = await apiClient.get<JobVacancyResponse>(`/JobVacancies/${jobVacancyId}`);
         return response.data;
     },
-
+    updateJobVacancy: async (jobVacancyId: string, data:{ title: string; aiPromptTemplate: string }) => {
+        const response = await apiClient.patch(`/JobVacancies/${jobVacancyId}`, data);
+        return response.data;
+    }
 }
