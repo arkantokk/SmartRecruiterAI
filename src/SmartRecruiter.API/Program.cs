@@ -59,13 +59,15 @@ builder.Services.AddAuthentication(options =>
 builder.Services.AddScoped<IAuthService, IdentityAuthService>();
 builder.Services.AddScoped<ITokenService, TokenService>();
 builder.Services.AddScoped<IFileParsingService, PdfParsingService>();
-builder.Services.AddHttpClient<IAiService, OpenAiService>();
-builder.Services.AddHttpClient<IOAuthClient, GoogleOAuthClient>();
 builder.Services.AddScoped<JobVacancyService>();
 builder.Services.AddScoped<CandidateService>();
 builder.Services.AddScoped<IEmailIntegrationRepository, EmailIntegrationRepository>();
 builder.Services.AddScoped<IGmailAuthService, GmailAuthService>();
+builder.Services.AddHttpClient<IAiService, OpenAiService>();
+builder.Services.AddHttpClient<IOAuthClient, GoogleOAuthClient>();
 builder.Services.AddHostedService<EmailBackgroundWorker>();
+builder.Services.AddHostedService<AiProcessingWorker>();
+builder.Services.AddSingleton<CandidateQueueService>();
 builder.Services.AddValidatorsFromAssemblyContaining<CreateCandidateValidator>();
 
 builder.Services.AddControllers();
