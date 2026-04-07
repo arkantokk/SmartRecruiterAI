@@ -9,13 +9,20 @@ public class CandidateQueueService
 
     public CandidateQueueService()
     {
-        var options = new UnboundedChannelOptions { SingleReader = true };
-        _queue = Channel.CreateUnbounded<CreateCandidateRequest>(options);
+        var options = new BoundedChannelOptions(100) // fix we need to make limited queue because server can break if there is too much emails
+        {
+            SingleReader = true,
+            SingleWriter = false, 
+            
+            FullMode = BoundedChannelFullMode.Wait 
+        };
+
+        _queue = Channel.CreateBounded<CreateCandidateRequest>(options);
     }
 
-    public async ValueTask EnqueueAsync(CreateCandidateRequest request)
+    public async ValueTask EnqueueAsync(CreateCandidateRequest request, CancellationToken ct = default)
     {
-        await _queue.Writer.WriteAsync(request);
+        await _queue.Writer.WriteAsync(request, ct);
     }
 
     public IAsyncEnumerable<CreateCandidateRequest> ReadAllAsync(CancellationToken ct)
