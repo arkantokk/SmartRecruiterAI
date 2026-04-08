@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using System.Security.Claims;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using SmartRecruiter.Application.DTOs;
 using SmartRecruiter.Application.Interfaces;
 
@@ -39,5 +41,13 @@ public class AuthController : ControllerBase
         {
             return BadRequest();
         }
+    }
+
+    [Authorize]
+    [HttpGet("me")]
+    public IActionResult Me()
+    {
+        var user = User.FindFirstValue(ClaimTypes.Name);
+        return Ok(user);
     }
 }
