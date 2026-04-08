@@ -1,11 +1,10 @@
 import { useNavigate } from "react-router-dom";
-import { useQueryClient } from '@tanstack/react-query';
+import {authService} from "../features/auth/authService.ts";
 export const Header = () => {
     const navigate = useNavigate();
-    const queryClient = useQueryClient();
-    const handleLogout = () => {
+    const handleLogout = async () => {
+        await authService.logout();
         localStorage.removeItem("token");
-        queryClient.clear();
         navigate("/login");
     };
 
