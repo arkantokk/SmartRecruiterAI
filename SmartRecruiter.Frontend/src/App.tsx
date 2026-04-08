@@ -6,17 +6,17 @@ import RegisterForm from "./features/auth/components/RegisterForm";
 import Candidates from "./pages/Candidates";
 import {VacancyDetails} from "./pages/VacancyDetails.tsx";
 
-const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
-    const token = localStorage.getItem("token");
-    if (!token) {
-        return <Navigate to="/login" replace />;
-    }
+import {authService} from "./features/auth/authService.ts";
+
+const ProtectedRoute =  ({ children }: { children: React.ReactNode }) => {
+    const response = authService.me();
+    if(!response) {return <Navigate to='/login'/>}
     return <>{children}</>;
 };
 
 const PublicRoute = ({ children }: { children: React.ReactNode }) => {
-    const token = localStorage.getItem("token");
-    if (token) {
+    const response = authService.me();
+    if (!response) {
         return <Navigate to="/candidates" replace />;
     }
     return <>{children}</>;

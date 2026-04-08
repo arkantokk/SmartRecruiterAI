@@ -12,5 +12,9 @@ export const authService = {
     register: async (data: authFormValues) => {
         const response = await apiClient.post("Auth/register", data);
         return response.data;
+    },
+    me: async () => {
+        const response = await apiClient.get("Auth/me");
+        return response.data;
     }
 }
