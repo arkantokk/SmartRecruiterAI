@@ -66,4 +66,23 @@ public class IdentityAuthService : IAuthService
         await _repository.UpdateAsync(token);
         return true;
     }
+
+    public async Task<TokensResult> RefreshAsync(string refreshToken)
+    {
+        var token = await _repository.GetByTokenAsync(refreshToken);
+        if (token == null || token.IsRevoked == true || token.ExpiryDate < DateTime.UtcNow)
+        {
+            return new TokensResult(false,  string.Empty, string.Empty);
+        }
+        
+        var user = await _userManager.FindByIdAsync(token.UserId);
+        // generating token
+        var newToken = new TokenUserDto(user.Id, user.Email);
+        var tokenString = _tokenService.GenerateToken(newToken);
+        var refreshTokenString = _tokenService.GenerateRefreshToken(); // generating string for refreshToken
+        var newRefreshToken = new RefreshToken(refreshTokenString, DateTime.UtcNow.AddDays(30), user.Id); //creating new object of refresh token
+        await _repository.AddAsync(newRefreshToken);
+        await RevokeAsync(refreshToken);
+        return new TokensResult(true, tokenString, refreshTokenString);
+    }
 }

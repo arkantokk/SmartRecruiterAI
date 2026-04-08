@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using System.Net;
+using Microsoft.AspNetCore.Mvc;
 using SmartRecruiter.Application.DTOs;
 using SmartRecruiter.Application.Interfaces;
 
@@ -56,6 +57,21 @@ public class AuthController : ControllerBase
         return Ok(new { message = "Logged out successfully" });
     }
 
+    [HttpPost("refresh")]
+    public async Task<IActionResult> RefreshTokenAsync()
+    {
+        var token = Request.Cookies["refreshToken"];
+        if (string.IsNullOrEmpty(token) )
+        {
+            return Unauthorized();
+        }
+        var result = await _authService.RefreshAsync(token);
+        if (!result.IsAuth) return Unauthorized();
+        SetRefreshTokenCookie(result.refreshToken);
+        return Ok(new {token = result.Token});
+
+    }
+    
     private void SetRefreshTokenCookie(string refreshToken)
     {
         var options = new CookieOptions
