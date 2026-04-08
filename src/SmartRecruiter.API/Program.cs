@@ -62,6 +62,7 @@ builder.Services.AddScoped<IFileParsingService, PdfParsingService>();
 builder.Services.AddScoped<JobVacancyService>();
 builder.Services.AddScoped<CandidateService>();
 builder.Services.AddScoped<IEmailIntegrationRepository, EmailIntegrationRepository>();
+builder.Services.AddScoped<ITokensRepository, TokensRepository>();
 builder.Services.AddScoped<IGmailAuthService, GmailAuthService>();
 builder.Services.AddHttpClient<IAiService, OpenAiService>();
 builder.Services.AddHttpClient<IOAuthClient, GoogleOAuthClient>();

@@ -16,6 +16,7 @@ public class ApplicationDbContext : IdentityDbContext<IdentityUser>
     public DbSet<Candidate> Candidates { get; set; }
     public DbSet<JobVacancy> JobVacancies { get; set; }
     public DbSet<EmailIntegration> EmailIntegrations { get; set; }
+    public DbSet<RefreshToken> RefreshTokens { get; set; }
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder); // moved to top to avoid inheritance errors
@@ -51,6 +52,16 @@ public class ApplicationDbContext : IdentityDbContext<IdentityUser>
                 .OnDelete(DeleteBehavior.Cascade);
             builder.Property(e => e.Provider).HasMaxLength(50);
             builder.Property(e => e.ConnectedEmail).HasMaxLength(256);
+        });
+        modelBuilder.Entity<RefreshToken>(builder =>
+        {
+            builder.HasKey(rt => rt.Id);
+            
+            builder.HasOne<IdentityUser>()
+                .WithMany()
+                .HasForeignKey(rt => rt.UserId)
+                .IsRequired()
+                .OnDelete(DeleteBehavior.Cascade); 
         });
     }
 }
