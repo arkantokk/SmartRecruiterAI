@@ -7,16 +7,18 @@ interface IAuthStore {
     checkAuth: () => Promise<void>;
     loginSuccess: () => void;
     logoutSuccess: () => void;
+    email: string;
 }
 
 
 export const useAuthStore = create<IAuthStore>((set) => ({
     isAuthenticated: false,
     isLoading: true,
+    email: "",
     checkAuth: async () => {
         try {
-            await authService.me();
-            set({ isAuthenticated: true });
+            const result = await authService.me();
+            set({ isAuthenticated: true , email: result.user});
         } catch (e) {
             set({ isAuthenticated: false });
         } finally {

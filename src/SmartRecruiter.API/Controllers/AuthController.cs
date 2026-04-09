@@ -73,6 +73,24 @@ public class AuthController : ControllerBase
 
     }
     
+    [Authorize]
+    [HttpGet("me")]
+    public IActionResult Me()
+    {
+        var user = User.FindFirstValue(ClaimTypes.Name);
+        return Ok(new { user = user });
+    }
+
+    [HttpPost("google-login")]
+    public async Task<IActionResult> GoogleLoginAsync([FromBody] GoogleLoginRequest request)
+    {
+        var token = request.Token;
+        var result = await _authService.GoogleLoginAsync(token);
+        if (!result.Succeeded) return BadRequest();
+        SetRefreshTokenCookie(result.RefreshToken);
+        return Ok(new { token = result.Token });
+    }
+    
     private void SetRefreshTokenCookie(string refreshToken)
     {
         var options = new CookieOptions
@@ -86,11 +104,5 @@ public class AuthController : ControllerBase
         Response.Cookies.Append("refreshToken", refreshToken, options);
     }
 
-    [Authorize]
-    [HttpGet("me")]
-    public IActionResult Me()
-    {
-        var user = User.FindFirstValue(ClaimTypes.Name);
-        return Ok(user);
-    }
+    
 }
