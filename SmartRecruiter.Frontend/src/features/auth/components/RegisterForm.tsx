@@ -5,11 +5,13 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { authService } from "../authService";
 import { useNavigate, Link } from "react-router-dom";
 import { useState } from "react";
+import {useAuthStore} from "../../../store/authStore.ts";
+import {type CredentialResponse, GoogleLogin, GoogleOAuthProvider} from "@react-oauth/google";
 
 export const RegisterForm = () => {
     const navigate = useNavigate();
     const [serverError, setServerError] = useState<string | null>(null);
-
+    const loginSuccess = useAuthStore((state) => state.loginSuccess)
     const { register, handleSubmit, formState: { errors } } = useForm<authFormValues>({
         resolver: zodResolver(authSchema),
     });
@@ -29,6 +31,19 @@ export const RegisterForm = () => {
             } else {
                 setServerError("An unexpected error occurred. Please try again.");
             }
+        }
+    }
+
+    const googleLogin = async (credentialResponse: CredentialResponse) => {
+        try{
+            const result = await authService.googleLogin(credentialResponse);
+            if (result.token) {
+                localStorage.setItem("token", result.token);
+                loginSuccess();
+                navigate("/candidates");
+            }
+        } catch (e) {
+            console.error(e);
         }
     }
 
@@ -100,7 +115,18 @@ export const RegisterForm = () => {
                         <Link to="/login" className="text-sm font-bold text-blue-600 hover:underline">
                             Login here
                         </Link>
+                        <GoogleOAuthProvider clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID}>
+
+                            <GoogleLogin
+                                onSuccess={credentialResponse => googleLogin(credentialResponse)}
+                                onError={() => {
+                                    console.log('something went wrong');
+                                }}
+                            />
+
+                        </GoogleOAuthProvider>
                     </div>
+
                 </form>
             </div>
         </div>
