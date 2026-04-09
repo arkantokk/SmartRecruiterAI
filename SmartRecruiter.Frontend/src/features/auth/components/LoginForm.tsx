@@ -4,9 +4,11 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { authService } from "../authService";
 import { useNavigate, Link } from "react-router-dom";
+import {useAuthStore} from "../../../store/authStore.ts";
 
 export const LoginForm = () => {
     const navigate = useNavigate();
+    const loginSuccess = useAuthStore((state) => state.loginSuccess)
     const { register, handleSubmit, formState: { errors } } = useForm<authFormValues>({
         resolver: zodResolver(authSchema),
     });
@@ -16,6 +18,7 @@ export const LoginForm = () => {
             const result = await authService.login(values);
             if (result.token) {
                 localStorage.setItem("token", result.token);
+                loginSuccess();
                 navigate("/candidates");
             }
         } catch (e) {

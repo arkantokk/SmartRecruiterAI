@@ -1,31 +1,17 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 
 import LoginForm from "./features/auth/components/LoginForm";
 import RegisterForm from "./features/auth/components/RegisterForm";
 import Candidates from "./pages/Candidates";
 import { VacancyDetails } from "./pages/VacancyDetails";
-import { authService } from "./features/auth/authService";
+import {useAuthStore} from "./store/authStore.ts";
 
 function App() {
-    const [isAuthenticated, setIsAuthenticated] = useState(false);
-    const [isLoading, setIsLoading] = useState(true);
-
+    const {isAuthenticated, isLoading, checkAuth} = useAuthStore();
     useEffect(() => {
-        const checkAuth = async () => {
-            try {
-                await authService.me();
-                setIsAuthenticated(true);
-            } catch (error) {
-                setIsAuthenticated(false);
-            } finally {
-                setIsLoading(false);
-            }
-        };
-
         checkAuth();
     }, []);
-
     if (isLoading) {
         return (
             <div className="flex items-center justify-center h-screen bg-gray-50">

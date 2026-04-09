@@ -1,9 +1,12 @@
 import { useNavigate } from "react-router-dom";
 import {authService} from "../features/auth/authService.ts";
+import {useAuthStore} from "../store/authStore.ts";
 export const Header = () => {
     const navigate = useNavigate();
+    const logoutSuccess = useAuthStore((state) => state.logoutSuccess);
     const handleLogout = async () => {
         await authService.logout();
+        logoutSuccess();
         localStorage.removeItem("token");
         navigate("/login");
     };
