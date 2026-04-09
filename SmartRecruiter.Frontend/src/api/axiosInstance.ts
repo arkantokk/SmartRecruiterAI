@@ -60,7 +60,6 @@ apiClient.interceptors.response.use(
                 localStorage.setItem('token', newToken);
                 originalRequest.headers.Authorization = `Bearer ${newToken}`;
                 processQueue(null, newToken);
-                console.log("refresh");
                 return apiClient(originalRequest);
             } catch (refreshError) {
                 processQueue(refreshError, null);

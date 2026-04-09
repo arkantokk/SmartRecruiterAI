@@ -10,10 +10,11 @@ namespace SmartRecruiter.API.Controllers;
 public class IntegrationsController : ControllerBase
 {
     private readonly IGmailAuthService _authService;
-
-    public IntegrationsController(IGmailAuthService authService)
+    private readonly IConfiguration _configuration;
+    public IntegrationsController(IGmailAuthService authService, IConfiguration configuration)
     {
         _authService = authService;
+        _configuration = configuration;
     }
 
     [HttpGet("google/connect")]
@@ -33,13 +34,14 @@ public class IntegrationsController : ControllerBase
     [HttpGet("google/callback")]
     public async Task<IActionResult> HandleCallBack(string code, string state)
     {
+        var frontendUrl = _configuration["FrontendUrl"]?.TrimEnd('/');
         if (state == null || code == null)
         {
-            return Redirect("http://localhost:5173/candidates?gmail=failure");
+            return Redirect($"{frontendUrl}/candidates?gmail=failure");
         }
 
         await _authService.HandleCallbackAsync(code, state);
-        return Redirect("http://localhost:5173/candidates?gmail=success");
+        return Redirect($"{frontendUrl}/candidates?gmail=success");
     }
 
     [HttpGet("google/status")]
