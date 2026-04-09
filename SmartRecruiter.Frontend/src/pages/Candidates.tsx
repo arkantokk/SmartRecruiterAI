@@ -61,7 +61,7 @@ export const Candidates = () => {
 
     return (
         <div className="min-h-screen bg-[#F8FAFC]">
-            <Header />
+            <Header/>
 
             <main className="max-w-[1600px] mx-auto px-6 py-10">
                 <div className="flex justify-between items-center mb-10">

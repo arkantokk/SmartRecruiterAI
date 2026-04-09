@@ -32,7 +32,7 @@ export const LoginForm = () => {
             const result = await authService.googleLogin(credentialResponse);
             if (result.token) {
                 localStorage.setItem("token", result.token);
-                loginSuccess();
+                await loginSuccess();
                 navigate("/candidates");
             }
         } catch (e) {
