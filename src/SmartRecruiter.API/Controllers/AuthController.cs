@@ -78,7 +78,7 @@ public class AuthController : ControllerBase
     public IActionResult Me()
     {
         var user = User.FindFirstValue(ClaimTypes.Name);
-        return Ok(user);
+        return Ok(new { user = user });
     }
 
     [HttpPost("google-login")]
