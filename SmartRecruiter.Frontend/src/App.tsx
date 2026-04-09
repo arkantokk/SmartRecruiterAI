@@ -10,7 +10,9 @@ import {useAuthStore} from "./store/authStore.ts";
 function App() {
     const {isAuthenticated, isLoading, checkAuth} = useAuthStore();
     useEffect(() => {
-        checkAuth();
+        if(!isAuthenticated){
+            checkAuth();
+        }
     }, []);
     if (isLoading) {
         return (
