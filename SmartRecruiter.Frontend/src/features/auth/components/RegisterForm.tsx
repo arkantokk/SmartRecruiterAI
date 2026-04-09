@@ -39,7 +39,7 @@ export const RegisterForm = () => {
             const result = await authService.googleLogin(credentialResponse);
             if (result.token) {
                 localStorage.setItem("token", result.token);
-                loginSuccess();
+                await loginSuccess();
                 navigate("/candidates");
             }
         } catch (e) {
@@ -115,16 +115,19 @@ export const RegisterForm = () => {
                         <Link to="/login" className="text-sm font-bold text-blue-600 hover:underline">
                             Login here
                         </Link>
-                        <GoogleOAuthProvider clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID}>
+                        <div className="mx-auto">
+                            <GoogleOAuthProvider clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID}>
 
-                            <GoogleLogin
-                                onSuccess={credentialResponse => googleLogin(credentialResponse)}
-                                onError={() => {
-                                    console.log('something went wrong');
-                                }}
-                            />
+                                <GoogleLogin
+                                    onSuccess={credentialResponse => googleLogin(credentialResponse)}
+                                    onError={() => {
+                                        console.log('something went wrong');
+                                    }}
+                                />
 
-                        </GoogleOAuthProvider>
+                            </GoogleOAuthProvider>
+                        </div>
+
                     </div>
 
                 </form>

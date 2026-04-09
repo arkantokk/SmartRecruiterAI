@@ -5,13 +5,13 @@ interface IAuthStore {
     isAuthenticated: boolean;
     isLoading: boolean;
     checkAuth: () => Promise<void>;
-    loginSuccess: () => void;
+    loginSuccess: () => Promise<void>;
     logoutSuccess: () => void;
     email: string;
 }
 
 
-export const useAuthStore = create<IAuthStore>((set) => ({
+export const useAuthStore = create<IAuthStore>((set, get) => ({
     isAuthenticated: false,
     isLoading: true,
     email: "",
@@ -26,11 +26,12 @@ export const useAuthStore = create<IAuthStore>((set) => ({
         }
     },
 
-    loginSuccess: () => {
+    loginSuccess: async () => {
         set({ isAuthenticated: true });
+        await get().checkAuth();
     },
 
     logoutSuccess: () => {
-        set({ isAuthenticated: false });
+        set({ isAuthenticated: false, email: "" });
     }
 }));
