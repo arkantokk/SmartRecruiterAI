@@ -81,7 +81,7 @@ public class IdentityAuthService : IAuthService
 
     public async Task<AuthResult> GoogleLoginAsync(string googleToken)
     {
-        var clientId = _configuration["Google:ClientId"];
+        var clientId = _configuration["GoogleAuth:ClientId"];
         if (string.IsNullOrEmpty(clientId))
         {
             throw new Exception("Add env of google Google:ClientId");

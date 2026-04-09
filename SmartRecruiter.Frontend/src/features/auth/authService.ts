@@ -1,6 +1,12 @@
-import { apiClient } from "../../api/axiosInstance";
-import type { authFormValues } from "./authSchema";
-import type {LoginResponse, LogoutResponse, RegisterResponse, MeRequestResponse} from "../../models/ApiResponse/AuthResponse.ts";
+import {apiClient} from "../../api/axiosInstance";
+import type {authFormValues} from "./authSchema";
+import type {
+    LoginResponse,
+    LogoutResponse,
+    RegisterResponse,
+    MeRequestResponse
+} from "../../models/ApiResponse/AuthResponse.ts";
+import type {CredentialResponse} from "@react-oauth/google";
 
 export const authService = {
     login: async (data: authFormValues): Promise<LoginResponse> => {
@@ -20,6 +26,10 @@ export const authService = {
     },
     me: async (): Promise<MeRequestResponse> => {
         const response = await apiClient.get("Auth/me", {withCredentials: true});
+        return response.data;
+    },
+    googleLogin: async (credentialResponse: CredentialResponse): Promise<LoginResponse> => {
+        const response = await apiClient.post("Auth/google-login", { token: credentialResponse.credential }, {withCredentials: true});
         return response.data;
     }
 }
