@@ -1,67 +1,48 @@
-import React from "react";
+import { useEffect } from "react";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 
 import LoginForm from "./features/auth/components/LoginForm";
 import RegisterForm from "./features/auth/components/RegisterForm";
 import Candidates from "./pages/Candidates";
-import {VacancyDetails} from "./pages/VacancyDetails.tsx";
-
-const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
-    const token = localStorage.getItem("token");
-    if (!token) {
-        return <Navigate to="/login" replace />;
-    }
-    return <>{children}</>;
-};
-
-const PublicRoute = ({ children }: { children: React.ReactNode }) => {
-    const token = localStorage.getItem("token");
-    if (token) {
-        return <Navigate to="/candidates" replace />;
-    }
-    return <>{children}</>;
-};
+import { VacancyDetails } from "./pages/VacancyDetails";
+import {useAuthStore} from "./store/authStore.ts";
 
 function App() {
+    const {isAuthenticated, isLoading, checkAuth} = useAuthStore();
+    useEffect(() => {
+        if(!isAuthenticated){
+            checkAuth();
+        }
+    }, []);
+    if (isLoading) {
+        return (
+            <div className="flex items-center justify-center h-screen bg-gray-50">
+                <div className="w-16 h-16 border-4 border-dashed rounded-full animate-spin border-blue-500"></div>
+            </div>
+        );
+    }
+
     return (
         <BrowserRouter>
             <Routes>
                 <Route
                     path="/login"
-                    element={
-                        <PublicRoute>
-                            <LoginForm />
-                        </PublicRoute>
-                    }
+                    element={isAuthenticated ? <Navigate to="/candidates" replace /> : <LoginForm />}
                 />
-
                 <Route
                     path="/register"
-                    element={
-                        <PublicRoute>
-                            <RegisterForm />
-                        </PublicRoute>
-                    }
+                    element={isAuthenticated ? <Navigate to="/candidates" replace /> : <RegisterForm />}
                 />
 
                 <Route
                     path="/candidates"
-                    element={
-                        <ProtectedRoute>
-                            <Candidates />
-                        </ProtectedRoute>
-                    }
+                    element={isAuthenticated ? <Candidates /> : <Navigate to="/login" replace />}
                 />
-
                 <Route
                     path="/vacancies/:id"
-                    element={
-                        <ProtectedRoute>
-                            <VacancyDetails/>
-                        </ProtectedRoute>
-                    }
+                    element={isAuthenticated ? <VacancyDetails /> : <Navigate to="/login" replace />}
                 />
-                <Route path="*" element={<Navigate to="/candidates" replace />} />
+                <Route path="*" element={<Navigate to={isAuthenticated ? "/candidates" : "/login"} replace />} />
             </Routes>
         </BrowserRouter>
     );

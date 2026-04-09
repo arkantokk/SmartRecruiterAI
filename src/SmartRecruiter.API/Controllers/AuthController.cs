@@ -1,4 +1,5 @@
-﻿using System.Net;
+using System.Security.Claims;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using SmartRecruiter.Application.DTOs;
 using SmartRecruiter.Application.Interfaces;
@@ -78,10 +79,18 @@ public class AuthController : ControllerBase
         {
             HttpOnly = true,
             Secure = true,
-            SameSite = SameSiteMode.Strict,
+            SameSite = SameSiteMode.None,
             Expires = DateTime.UtcNow.AddDays(30)
         };
         
         Response.Cookies.Append("refreshToken", refreshToken, options);
+    }
+
+    [Authorize]
+    [HttpGet("me")]
+    public IActionResult Me()
+    {
+        var user = User.FindFirstValue(ClaimTypes.Name);
+        return Ok(user);
     }
 }
