@@ -55,7 +55,6 @@ builder.Services.AddAuthentication(options =>
             ValidAudience = builder.Configuration["Jwt:Audience"],
             IssuerSigningKey = new SymmetricSecurityKey(
                 Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]!)),
-            ClockSkew = TimeSpan.Zero// remove later
         };
     });
 builder.Services.AddScoped<IAuthService, IdentityAuthService>();
@@ -113,6 +112,8 @@ builder.Services.AddSwaggerGen(c =>
 var app = builder.Build();
 app.UseExceptionHandler();
 // Configure the HTTP request pipeline.
+app.UseDefaultFiles();
+app.UseStaticFiles();
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
@@ -125,7 +126,7 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
-
+app.MapFallbackToFile("/index.html"); // redirect all non api requests to show frontend
 using (var scope = app.Services.CreateScope())
 {
     var services = scope.ServiceProvider;

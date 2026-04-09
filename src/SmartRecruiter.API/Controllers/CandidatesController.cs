@@ -39,7 +39,6 @@ public class CandidatesController : ControllerBase
             return BadRequest("Resume text or PDF file is required.");
         }
 
-        // 3. Віддаємо в сервіс вже заповнений об'єкт
         var id = await _candidateService.RegisterCandidateAsync(request);
         return Ok(id);
     }
@@ -57,22 +56,6 @@ public class CandidatesController : ControllerBase
         return Ok(res);
     }
     
-    [HttpPost("test-upload")]
-    public async Task<IActionResult> TestUpload(IFormFile file)
-    {
-        if (file == null || file.Length == 0)
-            return BadRequest("Файл не обрано");
-
-        // Відкриваємо потік (не завантажуючи весь файл в пам'ять)
-        await using var stream = file.OpenReadStream();
-    
-        // Викликаємо наш новий сервіс
-        var text = await _parsingService.ExtractTextAsync(stream);
-
-        // Повертаємо прочитаний текст, щоб ти побачив його очима
-        return Ok(new { FileName = file.FileName, ExtractedText = text });
-    }
-
     [HttpPatch("{id:guid}/status")]
     public async Task<IActionResult> UpdateStatus(Guid id, [FromBody] CandidateStatus newStatus)
     {
@@ -80,5 +63,5 @@ public class CandidatesController : ControllerBase
             return NoContent();
     }
 
-    
+    // method to create manually candidates
 }

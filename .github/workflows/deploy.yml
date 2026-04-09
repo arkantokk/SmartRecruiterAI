@@ -10,15 +10,28 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Build Frontend
+        run: |
+          cd SmartRecruiter.Frontend
+          npm install
+          npm run build
+        env:
+          VITE_API_BASE_URL: "/api"
+
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: '8.0.x'
 
-      - name: Build and Publish
+      - name: Build and Publish Backend
         run: |
           dotnet restore
-          dotnet publish -c Release -o ./publish
+          dotnet publish src/SmartRecruiter.API/SmartRecruiter.API.csproj -c Release -o ./publish
 
       - name: Deploy to Azure Web App
         uses: azure/webapps-deploy@v2

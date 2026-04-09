@@ -39,7 +39,7 @@ Desktop.ini
 TestResults/
 *.trx
 
-## --- SECURITY & CONFIGS (ВАЖЛИВО!) ---
+## --- SECURITY & CONFIGS ---
 appsettings.Local.json
 appsettings.Development.json
 .env
