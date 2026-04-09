@@ -5,6 +5,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { authService } from "../authService";
 import { useNavigate, Link } from "react-router-dom";
 import {useAuthStore} from "../../../store/authStore.ts";
+import { GoogleOAuthProvider, GoogleLogin } from '@react-oauth/google';
 
 export const LoginForm = () => {
     const navigate = useNavigate();
@@ -88,6 +89,18 @@ export const LoginForm = () => {
                         <Link to="/register" className="text-sm font-bold text-blue-600 hover:underline">
                             Register here
                         </Link>
+                        <GoogleOAuthProvider clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID}>
+
+                            <GoogleLogin
+                                onSuccess={credentialResponse => {
+
+                                }}
+                                onError={() => {
+                                    console.log('something went wrong');
+                                }}
+                            />
+
+                        </GoogleOAuthProvider>
                     </div>
                 </form>
             </div>
