@@ -5,7 +5,7 @@ import type {IntegrationStatusResponse} from "../../models/ApiResponse/StatusRes
 export const integrationService = {
     connectGmail: async () => {
         try {
-            const response = await apiClient.get<ApiResponse>('/integrations/google/connect');
+            const response = await apiClient.get<ApiResponse>('/Integrations/google/connect');
             const url = response.data.url;
             if (url) {
                 window.location.href = url;
@@ -17,7 +17,7 @@ export const integrationService = {
         }
     },
     status: async (): Promise<IntegrationStatusResponse> => {
-        const response = await apiClient.get<IntegrationStatusResponse>('/integrations/google/status');
+        const response = await apiClient.get<IntegrationStatusResponse>('/Integrations/google/status');
         return response.data;
 
     }
