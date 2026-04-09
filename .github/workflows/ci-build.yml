@@ -2,9 +2,9 @@
 
 on:
   push:
-    branches: [ "azure-test-prod" ]
+    branches: [ "main" ]
   pull_request:
-    branches: [ "azure-test-prod" ]
+    branches: [ "main" ]
 
 jobs:
   build_and_check:

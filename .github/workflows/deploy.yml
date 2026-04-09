@@ -2,7 +2,7 @@
 
 on:
   push:
-    branches: [ "azure-test-prod" ]
+    branches: [ "main" ]
     
 
 jobs:
