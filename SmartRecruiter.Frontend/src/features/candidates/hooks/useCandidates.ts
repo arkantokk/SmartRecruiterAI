@@ -5,7 +5,7 @@ export const useCandidates = () => {
     return useQuery({
         queryKey: ["candidates"],
         queryFn: candidatesService.getCandidates,
-        staleTime: 1000 * 60 * 5,
+        refetchInterval: 30000,
         retry: 1
     })
 }
