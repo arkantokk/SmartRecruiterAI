@@ -87,9 +87,9 @@ public class CandidateService
             ));
     }
 
-    public async Task<PagedResponse<CandidateDto>> GetCandidatesForUserAsync(string userId, int pageNumber, int pageSize)
+    public async Task<PagedResponse<CandidateDto>> GetCandidatesForUserAsync(string userId, int pageNumber, int pageSize, string? searchTerm = null, string? sortBy = null)
     {
-        return await _candidateQueries.GetCandidatesForUserAsync(userId, pageNumber, pageSize);
+        return await _candidateQueries.GetCandidatesForUserAsync(userId, pageNumber, pageSize, searchTerm, sortBy);
     }
 
     public async Task UpdateStatusAsync(Guid id, CandidateStatus newStatus)

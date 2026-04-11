@@ -102,14 +102,34 @@ public class CandidateReadService : ICandidateQueries
 
 
     public async Task<PagedResponse<CandidateDto>> GetCandidatesForUserAsync(string userId, int pageNumber,
-        int pageSize)
+        int pageSize,
+        string? searchTerm = null,
+        string? sortBy = null)
     {
         var baseQuery = _context.Candidates
             .AsNoTracking()
             .Where(c => _context.JobVacancies.Any(v => v.Id == c.JobVacancyId && v.UserId == userId));
+        
+        if (!string.IsNullOrWhiteSpace(searchTerm))
+        {
+            var search = searchTerm.ToLower();
+            baseQuery = baseQuery
+                .Where(c =>
+                    c.FirstName.Contains(search) ||
+                    c.LastName.Contains(search) ||
+                    c.Email.Contains(search) ||
+                    c.Skills.Contains(search));
+        }
+        
+        baseQuery = sortBy?.ToLower() switch
+        {
+            "name_asc" => baseQuery.OrderBy(c => c.FirstName).ThenBy(c => c.LastName),
+            "name_desc" => baseQuery.OrderByDescending(c => c.FirstName).ThenByDescending(c => c.LastName),
+            "score_asc" => baseQuery.OrderBy(c => c.Evaluation != null ? c.Evaluation.Score : 0),
+            _ => baseQuery.OrderByDescending(c => c.Evaluation != null ? c.Evaluation.Score : 0)
+        };
         var totalCount = await baseQuery.CountAsync();
         var candidates = await baseQuery
-            .OrderByDescending(c => c.Evaluation.Score)
             .Skip((pageNumber - 1) * pageSize)
             .Take(pageSize)
             .Select(c => new
