@@ -1,20 +1,21 @@
-import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import { CandidateCard } from '../components/CandidateCard';
-import { type Candidate } from '../features/candidates/candidatesService';
-import { Search, ListFilter } from 'lucide-react';
+import React, {useState, useEffect} from 'react';
+import {useParams, useNavigate} from 'react-router-dom';
+import {CandidateCard} from '../components/CandidateCard';
+import {type Candidate} from '../features/candidates/candidatesService';
+import {Search, ListFilter} from 'lucide-react';
 import {
     useVacancy,
     useVacancyCandidates,
     useUpdateCandidateStatus,
     useUpdateVacancy
 } from '../features/vacancies/hooks/useVacancyDetails';
+import {useDebounce} from "../hooks/useDebounce.ts";
 
 type Tab = 'Active' | 'Review' | 'Archived';
 type ArchiveFilter = 'All' | 'Hired' | 'Rejected';
 
 export const VacancyDetails: React.FC = () => {
-    const { id } = useParams<{ id: string }>();
+    const {id} = useParams<{ id: string }>();
     const navigate = useNavigate();
 
     const [page, setPage] = useState(1);
@@ -25,23 +26,23 @@ export const VacancyDetails: React.FC = () => {
 
     const [search, setSearch] = useState("");
     const [sort, setSort] = useState("score_desc");
-
+    const debouncedSearch = useDebounce(search, 300);
     const [isEditing, setIsEditing] = useState(false);
-    const [editForm, setEditForm] = useState({ title: '', aiPromptTemplate: '' });
+    const [editForm, setEditForm] = useState({title: '', aiPromptTemplate: ''});
 
-    const { data: vacancy, isLoading: isVacancyLoading } = useVacancy(id);
-    const { data: candidates, isLoading: isCandidatesLoading, isFetching } = useVacancyCandidates(
-        id, page, pageSize, search, sort, activeTab, archiveFilter
+    const {data: vacancy, isLoading: isVacancyLoading} = useVacancy(id);
+    const {data: candidates, isLoading: isCandidatesLoading, isFetching} = useVacancyCandidates(
+        id, page, pageSize, debouncedSearch, sort, activeTab, archiveFilter
     );
-    const { mutate: updateStatus, isPending: isUpdatingStatus } = useUpdateCandidateStatus(id);
-    const { mutate: updateVacancy, isPending: isSavingVacancy } = useUpdateVacancy(id);
+    const {mutate: updateStatus, isPending: isUpdatingStatus} = useUpdateCandidateStatus(id);
+    const {mutate: updateVacancy, isPending: isSavingVacancy} = useUpdateVacancy(id);
 
     const items = candidates?.items || [];
     const totalCount = candidates?.totalCount || 0;
     const totalPages = Math.ceil(totalCount / pageSize);
 
     useEffect(() => {
-        window.scrollTo({ top: 0, behavior: 'smooth' });
+        window.scrollTo({top: 0, behavior: 'smooth'});
     }, [page]);
 
     const handleStartEdit = () => {
@@ -99,13 +100,13 @@ export const VacancyDetails: React.FC = () => {
                         <input
                             type="text"
                             value={editForm.title}
-                            onChange={(e) => setEditForm({ ...editForm, title: e.target.value })}
+                            onChange={(e) => setEditForm({...editForm, title: e.target.value})}
                             className="w-full text-3xl font-extrabold border-b-2 border-blue-500 focus:outline-none py-1"
                             placeholder="Vacancy Title"
                         />
                         <textarea
                             value={editForm.aiPromptTemplate}
-                            onChange={(e) => setEditForm({ ...editForm, aiPromptTemplate: e.target.value })}
+                            onChange={(e) => setEditForm({...editForm, aiPromptTemplate: e.target.value})}
                             rows={5}
                             className="w-full p-4 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition"
                             placeholder="AI Prompt Template / Job Description"
@@ -189,7 +190,7 @@ export const VacancyDetails: React.FC = () => {
 
                 <div className="flex items-center gap-3 w-full md:w-auto">
                     <div className="relative w-full md:w-64">
-                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18}/>
                         <input
                             type="text"
                             placeholder="Search candidates..."
@@ -203,7 +204,7 @@ export const VacancyDetails: React.FC = () => {
                     </div>
 
                     <div className="relative shrink-0">
-                        <ListFilter className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
+                        <ListFilter className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18}/>
                         <select
                             value={sort}
                             onChange={(e) => {
@@ -221,7 +222,8 @@ export const VacancyDetails: React.FC = () => {
                 </div>
             </div>
 
-            <div className={`space-y-4 min-h-[400px] transition-opacity duration-200 ${isFetching ? 'opacity-50 pointer-events-none' : ''}`}>
+            <div
+                className={`space-y-4 min-h-[400px] transition-opacity duration-200 ${isFetching ? 'opacity-50 pointer-events-none' : ''}`}>
                 {isCandidatesLoading && items.length === 0 ? (
                     <div className="py-12 text-center text-gray-500 font-medium animate-pulse">
                         Loading candidates...
@@ -237,8 +239,8 @@ export const VacancyDetails: React.FC = () => {
                         <CandidateCard
                             key={candidate.id}
                             candidate={candidate}
-                            onAccept={(id) => updateStatus({ id, status: 6 })}
-                            onReject={(id) => updateStatus({ id, status: 5 })}
+                            onAccept={(id) => updateStatus({id, status: 6})}
+                            onReject={(id) => updateStatus({id, status: 5})}
                             isActionLoading={isUpdatingStatus}
                         />
                     ))
@@ -248,7 +250,9 @@ export const VacancyDetails: React.FC = () => {
             {totalCount > 0 && (
                 <div className="flex items-center justify-between px-2 py-4 border-t border-gray-100 mt-6">
                     <div className="text-sm font-medium text-gray-500">
-                        Showing <span className="font-bold text-gray-900">{(page - 1) * pageSize + 1}</span> to <span className="font-bold text-gray-900">{Math.min(page * pageSize, totalCount)}</span> of <span className="font-bold text-gray-900">{totalCount}</span> candidates
+                        Showing <span className="font-bold text-gray-900">{(page - 1) * pageSize + 1}</span> to <span
+                        className="font-bold text-gray-900">{Math.min(page * pageSize, totalCount)}</span> of <span
+                        className="font-bold text-gray-900">{totalCount}</span> candidates
                     </div>
 
                     <div className="flex items-center gap-3">
@@ -260,7 +264,8 @@ export const VacancyDetails: React.FC = () => {
                             Previous
                         </button>
 
-                        <div className="flex items-center gap-1 bg-white border border-gray-200 rounded-xl p-1 shadow-sm">
+                        <div
+                            className="flex items-center gap-1 bg-white border border-gray-200 rounded-xl p-1 shadow-sm">
                             <span className="px-3 py-1 text-sm font-bold text-blue-700 bg-blue-50 rounded-lg">
                                 {page}
                             </span>
