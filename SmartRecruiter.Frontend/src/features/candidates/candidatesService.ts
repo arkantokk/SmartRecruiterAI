@@ -22,7 +22,7 @@ export interface Candidate {
     status: string;
 }
 
-export interface PagedResponse<T>{
+export interface PagedResponse<T> {
     items: T[];
     totalCount: number;
     pageNumber: number;
@@ -30,8 +30,18 @@ export interface PagedResponse<T>{
 }
 
 export const candidatesService = {
-    getCandidates: async (pageNumber: number, pageSize: number) => {
-        const response = await apiClient.get<PagedResponse<Candidate>>("Candidates", {params: {pageNumber, pageSize}});
+    getCandidates: async (pageNumber: number,
+                          pageSize: number,
+                          searchTerm?: string,
+                          sortBy?: string) => {
+        const response = await apiClient.get<PagedResponse<Candidate>>("Candidates", {
+            params: {
+                pageNumber,
+                pageSize,
+                searchTerm: searchTerm || undefined,
+                sortBy: sortBy || undefined
+            }
+        });
         return response.data;
     },
 

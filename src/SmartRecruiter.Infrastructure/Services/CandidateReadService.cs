@@ -109,16 +109,19 @@ public class CandidateReadService : ICandidateQueries
         var baseQuery = _context.Candidates
             .AsNoTracking()
             .Where(c => _context.JobVacancies.Any(v => v.Id == c.JobVacancyId && v.UserId == userId));
+        // TODO: REWORK FOR THE FUTURE, SKILLS SHOULD BE A NEW ENTITY THAT HAS
+        // FOREIGN KEY THAT DEPENDS FROM CANDIDATE
         
         if (!string.IsNullOrWhiteSpace(searchTerm))
         {
             var search = searchTerm.ToLower();
             baseQuery = baseQuery
                 .Where(c =>
-                    c.FirstName.Contains(search) ||
-                    c.LastName.Contains(search) ||
-                    c.Email.Contains(search) ||
-                    c.Skills.Contains(search));
+                    c.FirstName.ToLower().Contains(search) ||
+                    c.LastName.ToLower().Contains(search) ||
+                    c.Email.ToLower().Contains(search) 
+                    // HERE SHOULD BE C.SKILLS.CONTAINS(SEARCH)
+                    );
         }
         
         baseQuery = sortBy?.ToLower() switch
