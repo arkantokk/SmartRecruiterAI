@@ -5,6 +5,7 @@ using SmartRecruiter.Application.DTOs;
 using SmartRecruiter.Application.Services;
 
 namespace SmartRecruiter.API.Controllers;
+
 [ApiController]
 [Authorize]
 [Route("api/[controller]")]
@@ -23,10 +24,11 @@ public class JobVacanciesController : ControllerBase
     public async Task<ActionResult> AddJobAsync(CreateJobVacancyRequest jobVacancyRequest)
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        if (userId == null) 
+        if (userId == null)
         {
             return Unauthorized("User ID not found in token.");
         }
+
         var id = await _jobVacancyService.AddJobVacancyAsync(jobVacancyRequest, userId);
         return Ok(id);
     }
@@ -48,11 +50,20 @@ public class JobVacanciesController : ControllerBase
         var vacancy = await _jobVacancyService.GetVacancyByIdAsync(id, userId);
         return Ok(vacancy);
     }
-    
-    [HttpGet("{id:guid}/candidates")]
-    public async Task<IActionResult> GetCandidatesByVacancyId(Guid id)
+
+    [HttpGet("{id:guid}/candidates")] 
+    public async Task<IActionResult> GetCandidatesByVacancyId(
+        Guid id,
+        [FromQuery] int pageNumber,
+        [FromQuery] int pageSize,
+        [FromQuery] string? search = null,
+        [FromQuery] string? sort = null,
+        [FromQuery] string? tab = "Active",
+        [FromQuery] string? archiveFilter = "All")
     {
-        var candidates = await _candidateService.GetAllCandidatesByVacancyIdAsync(id);
+        var candidates = await _candidateService.GetAllCandidatesByVacancyIdAsync(
+            id, pageNumber, pageSize, search, sort, tab, archiveFilter);
+
         return Ok(candidates);
     }
 
@@ -62,7 +73,7 @@ public class JobVacanciesController : ControllerBase
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
         if (userId == null) return Unauthorized();
 
-        try 
+        try
         {
             await _jobVacancyService.UpdateVacancyAsync(id, userId, request);
             return NoContent();

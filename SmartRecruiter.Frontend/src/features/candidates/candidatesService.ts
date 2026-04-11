@@ -1,4 +1,4 @@
-import { apiClient } from "../../api/axiosInstance.ts";
+import {apiClient} from "../../api/axiosInstance.ts";
 
 export const CandidateStatusMap = {
     Applied: 'Applied',
@@ -22,20 +22,54 @@ export interface Candidate {
     status: string;
 }
 
+export interface PagedResponse<T> {
+    items: T[];
+    totalCount: number;
+    pageNumber: number;
+    pageSize: number;
+}
+
 export const candidatesService = {
-    getCandidates: async () => {
-        const response = await apiClient.get<Candidate[]>("Candidates");
+    getCandidates: async (pageNumber: number,
+                          pageSize: number,
+                          searchTerm?: string,
+                          sortBy?: string) => {
+        const response = await apiClient.get<PagedResponse<Candidate>>("Candidates", {
+            params: {
+                pageNumber,
+                pageSize,
+                searchTerm: searchTerm || undefined,
+                sortBy: sortBy || undefined
+            }
+        });
         return response.data;
     },
 
-    getCandidatesByVacancyId: async (vacancyId: string) => {
-        const response = await apiClient.get<Candidate[]>(`JobVacancies/${vacancyId}/candidates`);
+    getCandidatesByVacancyId: async (
+        vacancyId: string,
+        pageNumber: number,
+        pageSize: number,
+        search?: string,
+        sort?: string,
+        tab?: string,
+        archiveFilter?: string
+    ) => {
+        const response = await apiClient.get(`JobVacancies/${vacancyId}/candidates`, {
+            params: {
+                pageNumber,
+                pageSize,
+                search: search || undefined,
+                sort: sort || undefined,
+                tab,
+                archiveFilter
+            }
+        });
         return response.data;
     },
 
     updateCandidateStatus: async (data: { id: string; status: number }) => {
         const response = await apiClient.patch(`Candidates/${data.id}/status`, data.status, {
-            headers: { 'Content-Type': 'application/json' }
+            headers: {'Content-Type': 'application/json'}
         });
         return response.data;
     }

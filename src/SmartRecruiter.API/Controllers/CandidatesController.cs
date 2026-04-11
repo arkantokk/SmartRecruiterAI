@@ -8,15 +8,18 @@ using SmartRecruiter.Domain.Enums;
 using SmartRecruiter.Domain.Interfaces;
 
 namespace SmartRecruiter.API.Controllers;
-[ApiController]
 
+[ApiController]
+[Authorize]
 [Route("api/[controller]")]
 public class CandidatesController : ControllerBase
 {
     private readonly CandidateService _candidateService;
     private readonly IValidator<CreateCandidateRequest> _validator;
     private readonly IFileParsingService _parsingService;
-    public CandidatesController(CandidateService candidateService, IValidator<CreateCandidateRequest> validator, IFileParsingService parsingService)
+
+    public CandidatesController(CandidateService candidateService, IValidator<CreateCandidateRequest> validator,
+        IFileParsingService parsingService)
     {
         _candidateService = candidateService;
         _validator = validator;
@@ -25,15 +28,15 @@ public class CandidatesController : ControllerBase
 
     [HttpPost]
     public async Task<IActionResult> Create(
-        [FromForm] CreateCandidateRequest request, 
-        IFormFile? file) 
+        [FromForm] CreateCandidateRequest request,
+        IFormFile? file)
     {
         if (file != null && file.Length > 0)
         {
             await using var stream = file.OpenReadStream();
             request.ResumeText = await _parsingService.ExtractTextAsync(stream);
         }
-    
+
         if (string.IsNullOrWhiteSpace(request.ResumeText))
         {
             return BadRequest("Resume text or PDF file is required.");
@@ -44,24 +47,26 @@ public class CandidatesController : ControllerBase
     }
 
     [HttpGet]
-    [Authorize]
-    public async Task<IActionResult> GetCandidates()
+    public async Task<IActionResult> GetCandidates(
+        int pageNumber,
+        int pageSize,
+        string? searchTerm = null,
+        string? sortBy = null)
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
         if (userId == null)
         {
             return Unauthorized("User ID not found in token.");
         }
-        var res = await _candidateService.GetCandidatesForUserAsync(userId);
+
+        var res = await _candidateService.GetCandidatesForUserAsync(userId, pageNumber, pageSize, searchTerm, sortBy);
         return Ok(res);
     }
-    
+
     [HttpPatch("{id:guid}/status")]
     public async Task<IActionResult> UpdateStatus(Guid id, [FromBody] CandidateStatus newStatus)
     {
-            await _candidateService.UpdateStatusAsync(id, newStatus);
-            return NoContent();
+        await _candidateService.UpdateStatusAsync(id, newStatus);
+        return NoContent();
     }
-
-    // method to create manually candidates
 }

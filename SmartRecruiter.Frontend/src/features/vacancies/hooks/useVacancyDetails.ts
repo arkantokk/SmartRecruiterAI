@@ -1,4 +1,4 @@
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import {useQuery, useMutation, useQueryClient, keepPreviousData} from "@tanstack/react-query";
 import { vacanciesService } from "../vacanciesService.ts";
 import { candidatesService } from "../../candidates/candidatesService.ts";
 
@@ -12,13 +12,22 @@ export const useVacancy = (id: string | null | undefined) => {
     });
 };
 
-export const useVacancyCandidates = (vacancyId: string | null | undefined) => {
+export const useVacancyCandidates = (
+    vacancyId: string | undefined,
+    page: number,
+    pageSize: number,
+    search: string,
+    sort: string,
+    tab: string,
+    archiveFilter: string
+) => {
     return useQuery({
-        queryKey: ["candidates", "vacancy", vacancyId],
-        queryFn: () => candidatesService.getCandidatesByVacancyId(vacancyId as string),
-        staleTime: 1000 * 60 * 5,
-        retry: 1,
-        enabled: !!vacancyId
+        queryKey: ['vacancy-candidates', vacancyId, page, pageSize, search, sort, tab, archiveFilter],
+        queryFn: () => candidatesService.getCandidatesByVacancyId(
+            vacancyId!, page, pageSize, search, sort, tab, archiveFilter
+        ),
+        enabled: !!vacancyId,
+        placeholderData: keepPreviousData
     });
 };
 

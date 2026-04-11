@@ -34,6 +34,7 @@ builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 builder.Services.AddProblemDetails();
 builder.Services.AddSingleton<IStorageService, BlobStorageService>();
 builder.Services.AddScoped<ICandidateRepository, CandidateRepository>();
+builder.Services.AddScoped<ICandidateQueries, CandidateReadService>();
 builder.Services.AddScoped<IJobVacancyRepository, JobVacancyRepository>();
 builder.Services.AddIdentity<IdentityUser, IdentityRole>()
     .AddEntityFrameworkStores<ApplicationDbContext>()

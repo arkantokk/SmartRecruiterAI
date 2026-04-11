@@ -49,6 +49,8 @@ public class CandidateRepository : ICandidateRepository
 
     public async Task<IEnumerable<Candidate>> GetAllCandidatesByVacancyIdAsync(Guid vacancyId)
     {
-        return await _context.Candidates.Where(с => с.JobVacancyId == vacancyId).ToListAsync<Candidate>();
+        return await _context.Candidates
+            .Where(с => с.JobVacancyId == vacancyId)
+            .ToListAsync<Candidate>();
     }
 }
