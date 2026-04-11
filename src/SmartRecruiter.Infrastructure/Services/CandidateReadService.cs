@@ -21,7 +21,7 @@ public class CandidateReadService : ICandidateQueries
     {
         var baseQuery = _context.Candidates
             .AsNoTracking()
-            .Where(c => c.JobVacancyId == vacancyId);
+            .Where(c => c.JobVacancyId == vacancyId );
         var totalCount = await baseQuery.CountAsync();
         var candidates = await baseQuery
             .OrderByDescending(c => c.Evaluation.Score)
@@ -60,7 +60,7 @@ public class CandidateReadService : ICandidateQueries
     {
         var baseQuery = _context.Candidates
             .AsNoTracking()
-            .Where(c => _context.JobVacancies.Any(v => v.UserId == userId));
+            .Where(c => _context.JobVacancies.Any(v => v.Id == c.JobVacancyId && v.UserId == userId));
         var totalCount = await baseQuery.CountAsync();
         var candidates = await baseQuery
             .OrderByDescending(c => c.Evaluation.Score)
