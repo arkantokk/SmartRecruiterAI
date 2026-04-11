@@ -12,10 +12,10 @@ export const useVacancy = (id: string | null | undefined) => {
     });
 };
 
-export const useVacancyCandidates = (vacancyId: string | null | undefined) => {
+export const useVacancyCandidates = (vacancyId: string | null | undefined, pageNumber: number, pageSize: number) => {
     return useQuery({
         queryKey: ["candidates", "vacancy", vacancyId],
-        queryFn: () => candidatesService.getCandidatesByVacancyId(vacancyId as string),
+        queryFn: () => candidatesService.getCandidatesByVacancyId(vacancyId as string, pageNumber, pageSize),
         staleTime: 1000 * 60 * 5,
         retry: 1,
         enabled: !!vacancyId

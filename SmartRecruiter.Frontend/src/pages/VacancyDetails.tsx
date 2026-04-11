@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { CandidateCard } from '../components/CandidateCard';
 import { type Candidate } from '../features/candidates/candidatesService';
@@ -15,6 +15,10 @@ type ArchiveFilter = 'All' | 'Hired' | 'Rejected';
 export const VacancyDetails: React.FC = () => {
     const { id } = useParams<{ id: string }>();
     const navigate = useNavigate();
+
+    const [page, setPage] = useState(1);
+    const pageSize = 10;
+
     const [activeTab, setActiveTab] = useState<Tab>('Active');
     const [archiveFilter, setArchiveFilter] = useState<ArchiveFilter>('All');
 
@@ -22,9 +26,16 @@ export const VacancyDetails: React.FC = () => {
     const [editForm, setEditForm] = useState({ title: '', aiPromptTemplate: '' });
 
     const { data: vacancy, isLoading: isVacancyLoading } = useVacancy(id);
-    const { data: candidates, isLoading: isCandidatesLoading } = useVacancyCandidates(id);
+    const { data: candidates, isLoading: isCandidatesLoading, isFetching } = useVacancyCandidates(id, page, pageSize);
     const { mutate: updateStatus, isPending: isUpdatingStatus } = useUpdateCandidateStatus(id);
     const { mutate: updateVacancy, isPending: isSavingVacancy } = useUpdateVacancy(id);
+
+    const totalCount = candidates?.totalCount || 0;
+    const totalPages = Math.ceil(totalCount / pageSize);
+
+    useEffect(() => {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }, [page]);
 
     const handleStartEdit = () => {
         if (vacancy) {
@@ -43,9 +54,11 @@ export const VacancyDetails: React.FC = () => {
     };
 
     const filteredCandidates = useMemo(() => {
-        if (!candidates) return [];
+        const candidateItems = candidates?.items || [];
 
-        return candidates.filter((c: Candidate) => {
+        if (candidateItems.length === 0) return [];
+
+        return candidateItems.filter((c: Candidate) => {
             const status = String(c.status);
 
             if (activeTab === 'Active') {
@@ -157,7 +170,10 @@ export const VacancyDetails: React.FC = () => {
                     {(['Active', 'Review', 'Archived'] as Tab[]).map((tab) => (
                         <button
                             key={tab}
-                            onClick={() => setActiveTab(tab)}
+                            onClick={() => {
+                                setActiveTab(tab);
+                                setPage(1);
+                            }}
                             className={`px-6 py-2.5 rounded-lg text-sm font-semibold transition-all duration-200 ${
                                 activeTab === tab
                                     ? 'bg-white text-gray-900 shadow-sm'
@@ -174,7 +190,10 @@ export const VacancyDetails: React.FC = () => {
                         {(['All', 'Hired', 'Rejected'] as ArchiveFilter[]).map((filter) => (
                             <button
                                 key={filter}
-                                onClick={() => setArchiveFilter(filter)}
+                                onClick={() => {
+                                    setArchiveFilter(filter);
+                                    setPage(1);
+                                }}
                                 className={`px-4 py-1.5 rounded-lg text-xs font-bold transition-all ${
                                     archiveFilter === filter
                                         ? 'bg-white text-blue-600 shadow-sm'
@@ -188,7 +207,7 @@ export const VacancyDetails: React.FC = () => {
                 )}
             </div>
 
-            <div className="space-y-4">
+            <div className={`space-y-4 min-h-[400px] transition-opacity duration-200 ${isFetching ? 'opacity-50 pointer-events-none' : ''}`}>
                 {isCandidatesLoading ? (
                     <div className="py-12 text-center text-gray-500 font-medium animate-pulse">
                         Loading candidates...
@@ -211,6 +230,42 @@ export const VacancyDetails: React.FC = () => {
                     ))
                 )}
             </div>
+
+            {totalCount > 0 && (
+                <div className="flex items-center justify-between px-2 py-4 border-t border-gray-100 mt-6">
+                    <div className="text-sm font-medium text-gray-500">
+                        Showing <span className="font-bold text-gray-900">{(page - 1) * pageSize + 1}</span> to <span className="font-bold text-gray-900">{Math.min(page * pageSize, totalCount)}</span> of <span className="font-bold text-gray-900">{totalCount}</span> candidates
+                    </div>
+
+                    <div className="flex items-center gap-3">
+                        <button
+                            disabled={page === 1}
+                            onClick={() => setPage(page - 1)}
+                            className="px-4 py-2 text-sm font-bold text-gray-700 bg-white border border-gray-200 rounded-xl hover:bg-gray-50 hover:border-gray-300 disabled:opacity-40 disabled:hover:bg-white disabled:cursor-not-allowed transition-all shadow-sm flex items-center gap-1"
+                        >
+                            Previous
+                        </button>
+
+                        <div className="flex items-center gap-1 bg-white border border-gray-200 rounded-xl p-1 shadow-sm">
+                            <span className="px-3 py-1 text-sm font-bold text-blue-700 bg-blue-50 rounded-lg">
+                                {page}
+                            </span>
+                            <span className="text-gray-300 font-medium">/</span>
+                            <span className="px-3 py-1 text-sm font-bold text-gray-600">
+                                {totalPages}
+                            </span>
+                        </div>
+
+                        <button
+                            disabled={page >= totalPages}
+                            onClick={() => setPage(page + 1)}
+                            className="px-4 py-2 text-sm font-bold text-gray-700 bg-white border border-gray-200 rounded-xl hover:bg-gray-50 hover:border-gray-300 disabled:opacity-40 disabled:hover:bg-white disabled:cursor-not-allowed transition-all shadow-sm flex items-center gap-1"
+                        >
+                            Next
+                        </button>
+                    </div>
+                </div>
+            )}
         </div>
     );
 };
