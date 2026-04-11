@@ -87,22 +87,9 @@ public class CandidateService
             ));
     }
 
-    public async Task<IEnumerable<CandidateDto>> GetCandidatesForUserAsync(string userId)
+    public async Task<PagedResponse<CandidateDto>> GetCandidatesForUserAsync(string userId, int pageNumber, int pageSize)
     {
-        var candidates = await _repository.GetCandidatesByUserIdAsync(userId);
-        return candidates
-            .OrderByDescending(c => c.Evaluation?.Score ?? 0)
-            .Select(c => new CandidateDto(
-                c.Id,
-                c.FirstName,
-                c.LastName,
-                c.Email,
-                c.ResumeUrl != null ? _storageService.GenerateReadOnlyUrl(c.ResumeUrl, TimeSpan.FromHours(1)) : null,
-                c.Evaluation?.Score ?? 0,
-                c.Evaluation?.Summary ?? string.Empty,
-                c.Evaluation?.Skills ?? new List<string>(),
-                c.Status.ToString()
-            ));
+        return await _candidateQueries.GetCandidatesForUserAsync(userId, pageNumber, pageSize);
     }
 
     public async Task UpdateStatusAsync(Guid id, CandidateStatus newStatus)

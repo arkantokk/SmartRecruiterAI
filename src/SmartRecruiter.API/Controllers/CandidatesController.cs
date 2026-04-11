@@ -9,7 +9,7 @@ using SmartRecruiter.Domain.Interfaces;
 
 namespace SmartRecruiter.API.Controllers;
 [ApiController]
-
+[Authorize]
 [Route("api/[controller]")]
 public class CandidatesController : ControllerBase
 {
@@ -44,15 +44,14 @@ public class CandidatesController : ControllerBase
     }
 
     [HttpGet]
-    [Authorize]
-    public async Task<IActionResult> GetCandidates()
+    public async Task<IActionResult> GetCandidates(int pageNumber, int pageSize)
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
         if (userId == null)
         {
             return Unauthorized("User ID not found in token.");
         }
-        var res = await _candidateService.GetCandidatesForUserAsync(userId);
+        var res = await _candidateService.GetCandidatesForUserAsync(userId, pageNumber, pageSize);
         return Ok(res);
     }
     
@@ -62,6 +61,5 @@ public class CandidatesController : ControllerBase
             await _candidateService.UpdateStatusAsync(id, newStatus);
             return NoContent();
     }
-
-    // method to create manually candidates
+    
 }

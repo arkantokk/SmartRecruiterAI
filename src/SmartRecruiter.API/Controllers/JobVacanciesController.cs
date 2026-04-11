@@ -40,7 +40,7 @@ public class JobVacanciesController : ControllerBase
         return Ok(vacancies);
     }
 
-    [HttpGet("{id:guid}")]
+    [HttpGet]
     public async Task<IActionResult> GetVacancyById(Guid id)
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
