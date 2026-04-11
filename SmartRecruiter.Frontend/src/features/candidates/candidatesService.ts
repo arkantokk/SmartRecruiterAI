@@ -35,11 +35,23 @@ export const candidatesService = {
         return response.data;
     },
 
-    getCandidatesByVacancyId: async (vacancyId: string, pageNumber: number, pageSize: number) => {
-        const response = await apiClient.get<PagedResponse<Candidate>>(`JobVacancies/${vacancyId}/candidates`, {
+    getCandidatesByVacancyId: async (
+        vacancyId: string,
+        pageNumber: number,
+        pageSize: number,
+        search?: string,
+        sort?: string,
+        tab?: string,
+        archiveFilter?: string
+    ) => {
+        const response = await apiClient.get(`JobVacancies/${vacancyId}/candidates`, {
             params: {
                 pageNumber,
-                pageSize
+                pageSize,
+                search: search || undefined,
+                sort: sort || undefined,
+                tab,
+                archiveFilter
             }
         });
         return response.data;
