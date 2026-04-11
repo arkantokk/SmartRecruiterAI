@@ -40,7 +40,7 @@ public class JobVacanciesController : ControllerBase
         return Ok(vacancies);
     }
 
-    [HttpGet]
+    [HttpGet("{id:guid}")]
     public async Task<IActionResult> GetVacancyById(Guid id)
     {
         var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
@@ -49,7 +49,7 @@ public class JobVacanciesController : ControllerBase
         return Ok(vacancy);
     }
     
-    [HttpGet("/candidates")]
+    [HttpGet("{id:guid}/candidates")]
     public async Task<IActionResult> GetCandidatesByVacancyId(Guid id, int pageNumber, int pageSize)
     {
         var candidates = await _candidateService.GetAllCandidatesByVacancyIdAsync(id, pageNumber, pageSize);
