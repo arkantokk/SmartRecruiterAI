@@ -97,8 +97,10 @@ public class CandidateService
         await _repository.UpdateStatusAsync(id, newStatus);
     }
 
-    public async Task<PagedResponse<CandidateDto>> GetAllCandidatesByVacancyIdAsync(Guid jobVacancyId, int pageNumber, int pageSize)
+    public async Task<PagedResponse<CandidateDto>> GetAllCandidatesByVacancyIdAsync(
+        Guid jobVacancyId, int pageNumber, int pageSize, string? searchTerm = null, string? sortBy = null, string? statusTab = "Active", string? archiveFilter = "All")
     {
-        return await _candidateQueries.GetCandidatesForVacancyIdAsync(jobVacancyId, pageNumber, pageSize);
+        return await _candidateQueries.GetCandidatesForVacancyIdAsync(
+            jobVacancyId, pageNumber, pageSize, searchTerm, sortBy, statusTab, archiveFilter);
     }
 }
