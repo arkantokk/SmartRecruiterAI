@@ -49,10 +49,10 @@ public class JobVacanciesController : ControllerBase
         return Ok(vacancy);
     }
     
-    [HttpGet("{id:guid}/candidates")]
-    public async Task<IActionResult> GetCandidatesByVacancyId(Guid id)
+    [HttpGet("/candidates")]
+    public async Task<IActionResult> GetCandidatesByVacancyId(Guid id, int pageNumber, int pageSize)
     {
-        var candidates = await _candidateService.GetAllCandidatesByVacancyIdAsync(id);
+        var candidates = await _candidateService.GetAllCandidatesByVacancyIdAsync(id, pageNumber, pageSize);
         return Ok(candidates);
     }
 

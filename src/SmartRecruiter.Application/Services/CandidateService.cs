@@ -1,4 +1,5 @@
 ﻿using SmartRecruiter.Application.DTOs;
+using SmartRecruiter.Application.Interfaces;
 using SmartRecruiter.Domain.Entities;
 using SmartRecruiter.Domain.Enums;
 using SmartRecruiter.Domain.Interfaces;
@@ -11,18 +12,20 @@ public class CandidateService
     private readonly IJobVacancyRepository _vacancyRepository;
     private readonly IAiService _aiService;
     private readonly IStorageService _storageService;
-
+    private readonly ICandidateQueries _candidateQueries;
     public CandidateService(
         ICandidateRepository repository,
         IAiService aiService,
         IJobVacancyRepository jobVacancyRepository,
-        IStorageService storageService
+        IStorageService storageService,
+        ICandidateQueries candidateQueries
     )
     {
         _repository = repository;
         _aiService = aiService;
         _vacancyRepository = jobVacancyRepository;
         _storageService = storageService;
+        _candidateQueries = candidateQueries;
     }
 
     public async Task<Guid> RegisterCandidateAsync(CreateCandidateRequest request)
@@ -107,21 +110,8 @@ public class CandidateService
         await _repository.UpdateStatusAsync(id, newStatus);
     }
 
-    public async Task<IEnumerable<CandidateDto>> GetAllCandidatesByVacancyIdAsync(Guid jobVacancyId)
+    public async Task<PagedResponse<CandidateDto>> GetAllCandidatesByVacancyIdAsync(Guid jobVacancyId, int pageNumber, int pageSize)
     {
-        var candidates = await _repository.GetAllCandidatesByVacancyIdAsync(jobVacancyId);
-
-        return candidates
-            .OrderByDescending(c => c.Evaluation?.Score ?? 0)
-            .Select(c => new CandidateDto(
-                c.Id,
-                c.FirstName,
-                c.LastName,
-                c.Email,
-                c.ResumeUrl != null ? _storageService.GenerateReadOnlyUrl(c.ResumeUrl, TimeSpan.FromHours(1)) : null,
-                c.Evaluation?.Score ?? 0,
-                c.Evaluation?.Summary ?? string.Empty,
-                c.Evaluation?.Skills ?? new List<string>(),
-                c.Status.ToString()));
+        return await _candidateQueries.GetCandidatesForVacancyIdAsync(jobVacancyId, pageNumber, pageSize);
     }
 }
