@@ -10,6 +10,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SmartRecruiter.Application"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SmartRecruiter.API", "src\SmartRecruiter.API\SmartRecruiter.API.csproj", "{1E7D3520-49F7-46B8-8FAD-877408FE2C1B}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{17578593-23EB-47F6-B94A-7B1B0C95519A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SmartRecruiter.Application.Tests", "SmartRecruiter.Application.Tests\SmartRecruiter.Application.Tests.csproj", "{A2C0E2F1-CEF5-458B-8D53-547391EEEC43}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -20,6 +24,7 @@ Global
 		{CEBC3066-21B8-4D1F-8631-E63A308AE4E5} = {18B194F9-A78D-4852-99D7-EA8EA96661A1}
 		{1DD5FF33-797D-4DB7-97DE-EFA73AA5E11C} = {18B194F9-A78D-4852-99D7-EA8EA96661A1}
 		{1E7D3520-49F7-46B8-8FAD-877408FE2C1B} = {18B194F9-A78D-4852-99D7-EA8EA96661A1}
+		{A2C0E2F1-CEF5-458B-8D53-547391EEEC43} = {17578593-23EB-47F6-B94A-7B1B0C95519A}
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{19E710E4-8FBF-4920-B5DA-97D19DF1C94D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
@@ -38,5 +43,9 @@ Global
 		{1E7D3520-49F7-46B8-8FAD-877408FE2C1B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1E7D3520-49F7-46B8-8FAD-877408FE2C1B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1E7D3520-49F7-46B8-8FAD-877408FE2C1B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A2C0E2F1-CEF5-458B-8D53-547391EEEC43}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A2C0E2F1-CEF5-458B-8D53-547391EEEC43}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A2C0E2F1-CEF5-458B-8D53-547391EEEC43}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A2C0E2F1-CEF5-458B-8D53-547391EEEC43}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
