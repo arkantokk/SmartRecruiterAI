@@ -68,24 +68,24 @@ public class CandidateService
         return candidate.Id;
     }
 
-    public async Task<IEnumerable<CandidateDto>> GetAllCandidatesAsync()
-    {
-        var candidates = await _repository.GetAllCandidatesAsync();
-
-        return candidates
-            .OrderByDescending(c => c.Evaluation.Score)
-            .Select(c => new CandidateDto(
-                c.Id,
-                c.FirstName,
-                c.LastName,
-                c.Email,
-                c.ResumeUrl != null ? _storageService.GenerateReadOnlyUrl(c.ResumeUrl, TimeSpan.FromHours(1)) : null,
-                c.Evaluation?.Score ?? 0,
-                c.Evaluation?.Summary ?? string.Empty,
-                c.Evaluation?.Skills ?? new List<string>(),
-                c.Status.ToString()
-            ));
-    }
+    // public async Task<IEnumerable<CandidateDto>> GetAllCandidatesAsync()
+    // {
+    //     var candidates = await _repository.GetAllCandidatesAsync();
+    //
+    //     return candidates
+    //         .OrderByDescending(c => c.Evaluation.Score)
+    //         .Select(c => new CandidateDto(
+    //             c.Id,
+    //             c.FirstName,
+    //             c.LastName,
+    //             c.Email,
+    //             c.ResumeUrl != null ? _storageService.GenerateReadOnlyUrl(c.ResumeUrl, TimeSpan.FromHours(1)) : null,
+    //             c.Evaluation?.Score ?? 0,
+    //             c.Evaluation?.Summary ?? string.Empty,
+    //             c.Evaluation?.Skills ?? new List<string>(),
+    //             c.Status.ToString()
+    //         ));
+    // }
 
     public async Task<PagedResponse<CandidateDto>> GetCandidatesForUserAsync(string userId, int pageNumber, int pageSize, string? searchTerm = null, string? sortBy = null)
     {
