@@ -5,6 +5,7 @@ using SmartRecruiter.Application.DTOs;
 using SmartRecruiter.Application.Services;
 using SmartRecruiter.Domain.DTOs;
 using SmartRecruiter.Domain.Entities;
+using SmartRecruiter.Domain.Enums;
 using Xunit;
 
 namespace SmartRecruiter.Application.Tests.Services;
@@ -85,5 +86,14 @@ public class CandidateServiceTests
 
         await _service.RegisterCandidateAsync(request);
         _repository.Verify(repo => repo.AddAsync(It.IsAny<Candidate>()), Times.Once);
+    }
+
+    [Fact]
+    public async Task UpdateStatusAsync_Should_Update_When_DataIsValid()
+    {
+        var requestId = Guid.NewGuid();
+        var requestEnum = CandidateStatus.Applied;
+        await _service.UpdateStatusAsync(requestId, requestEnum);
+        _repository.Verify(repo => repo.UpdateStatusAsync(requestId, requestEnum));
     }
 }
