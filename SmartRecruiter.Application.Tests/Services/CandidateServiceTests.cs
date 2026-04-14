@@ -96,4 +96,44 @@ public class CandidateServiceTests
         await _service.UpdateStatusAsync(requestId, requestEnum);
         _repository.Verify(repo => repo.UpdateStatusAsync(requestId, requestEnum));
     }
+
+    [Fact]
+    public async Task GetAllCandidatesByVacancyIdAsync_Should_Return_Candidates_When_DataIsValid()
+    {
+        var requestId = Guid.NewGuid();
+        var pageNumber = 2;
+        var pageSize = 10;
+        var searchTerm = "term";
+        string? sortBy = null;
+        var statusTab = "Active";
+        var archiveFilter = "All";
+        var returnData = new PagedResponse<CandidateDto>
+        (
+            new List<CandidateDto>(),
+            100,
+            2,
+            10
+            );
+
+        _candidateQueries.Setup(x => x
+                .GetCandidatesForVacancyIdAsync(
+                    requestId,
+                    pageNumber,
+                    pageSize,
+                    searchTerm,
+                    sortBy,
+                    statusTab,
+                    archiveFilter
+                ))
+            .ReturnsAsync(returnData);
+
+        var result = await _service.GetAllCandidatesByVacancyIdAsync(requestId,
+            pageNumber,
+            pageSize,
+            searchTerm,
+            sortBy,
+            statusTab,
+            archiveFilter);
+        Assert.Same(returnData ,result);
+    }
 }
