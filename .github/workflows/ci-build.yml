@@ -26,22 +26,21 @@ jobs:
         run: dotnet build SmartRecruiterAI.sln --configuration Release --no-restore
 
       - name: 5. Run Tests
-        run: dotnet test SmartRecruiterAI.sln --no-build --verbosity normal
-        
-        # Frontend setup
-          - name: Setup Node.js
-              uses: actions/setup-node@v4
-              with:
-                node-version: 20
-                cache: 'npm'
-                cache-dependency-path: SmartRecruiter.Frontend/package-lock.json
+        run: dotnet test SmartRecruiterAI.sln --configuration Release --no-build --verbosity normal
 
-                - name: Install Frontend Dependencies
-                  run: |
-                    cd SmartRecruiter.Frontend
-                    npm ci
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+          cache-dependency-path: SmartRecruiter.Frontend/package-lock.json
 
-                - name: Run Frontend Tests
-                  run: |
-                    cd SmartRecruiter.Frontend
-                    npm run test -- --run # The --run flag tells Vitest to run once and exit
+      - name: Install Frontend Dependencies
+        run: |
+          cd SmartRecruiter.Frontend
+          npm ci
+
+      - name: Run Frontend Tests
+        run: |
+          cd SmartRecruiter.Frontend
+          npm run test -- --run
