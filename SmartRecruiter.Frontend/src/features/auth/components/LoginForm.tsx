@@ -51,10 +51,11 @@ export const LoginForm = () => {
 
                 <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
                     <div className="flex flex-col gap-1.5">
-                        <label className="text-sm font-semibold text-gray-700">
+                        <label htmlFor="email" className="text-sm font-semibold text-gray-700">
                             Email Address
                         </label>
                         <input
+                            id="email"
                             type="email"
                             placeholder="you@example.com"
                             className={`w-full px-4 py-2.5 rounded-lg border bg-gray-50 focus:bg-white outline-none transition-all duration-200 ${
@@ -72,10 +73,11 @@ export const LoginForm = () => {
                     </div>
 
                     <div className="flex flex-col gap-1.5">
-                        <label className="text-sm font-semibold text-gray-700">
+                        <label htmlFor="password" className="text-sm font-semibold text-gray-700">
                             Password
                         </label>
                         <input
+                            id="password"
                             type="password"
                             placeholder="••••••••"
                             className={`w-full px-4 py-2.5 rounded-lg border bg-gray-50 focus:bg-white outline-none transition-all duration-200 ${
@@ -111,7 +113,7 @@ export const LoginForm = () => {
                         <Link to="/register" className="text-sm font-bold text-blue-600 hover:underline">
                             Register here
                         </Link>
-                        <GoogleOAuthProvider clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID}>
+                        <GoogleOAuthProvider clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID || "test-client-id"}>
                             <GoogleLogin
                                 onSuccess={credentialResponse => googleLogin(credentialResponse)}
                                 onError={() => {
