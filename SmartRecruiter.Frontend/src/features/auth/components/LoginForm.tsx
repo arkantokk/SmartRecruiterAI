@@ -4,12 +4,14 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { authService } from "../authService";
 import { useNavigate, Link } from "react-router-dom";
-import {useAuthStore} from "../../../store/authStore.ts";
-import {GoogleOAuthProvider, GoogleLogin, type CredentialResponse} from '@react-oauth/google';
+import { useAuthStore } from "../../../store/authStore.ts";
+import { GoogleOAuthProvider, GoogleLogin, type CredentialResponse } from '@react-oauth/google';
 
 export const LoginForm = () => {
     const navigate = useNavigate();
-    const loginSuccess = useAuthStore((state) => state.loginSuccess)
+
+    const { loginSuccess, isLoading, error } = useAuthStore() as any;
+
     const { register, handleSubmit, formState: { errors } } = useForm<authFormValues>({
         resolver: zodResolver(authSchema),
     });
@@ -19,7 +21,7 @@ export const LoginForm = () => {
             const result = await authService.login(values);
             if (result.token) {
                 localStorage.setItem("token", result.token);
-                loginSuccess();
+                if (loginSuccess) loginSuccess();
                 navigate("/candidates");
             }
         } catch (e) {
@@ -28,11 +30,11 @@ export const LoginForm = () => {
     }
 
     const googleLogin = async (credentialResponse: CredentialResponse) => {
-        try{
+        try {
             const result = await authService.googleLogin(credentialResponse);
             if (result.token) {
                 localStorage.setItem("token", result.token);
-                await loginSuccess();
+                if (loginSuccess) await loginSuccess();
                 navigate("/candidates");
             }
         } catch (e) {
@@ -90,11 +92,18 @@ export const LoginForm = () => {
                         )}
                     </div>
 
+                    {error && (
+                        <div className="text-red-500 text-sm font-semibold text-center">
+                            {error}
+                        </div>
+                    )}
+
                     <button
                         type="submit"
-                        className="w-full mt-2 bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg shadow-md hover:shadow-lg transition-all duration-200 active:transform active:scale-95 focus:outline-none focus:ring-4 focus:ring-blue-200"
+                        disabled={isLoading}
+                        className="w-full mt-2 bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg shadow-md hover:shadow-lg transition-all duration-200 active:transform active:scale-95 focus:outline-none focus:ring-4 focus:ring-blue-200 disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                        Login
+                        {isLoading ? 'Signing in...' : 'Login'}
                     </button>
 
                     <div className="text-center mt-4">
@@ -103,14 +112,12 @@ export const LoginForm = () => {
                             Register here
                         </Link>
                         <GoogleOAuthProvider clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID}>
-
                             <GoogleLogin
                                 onSuccess={credentialResponse => googleLogin(credentialResponse)}
                                 onError={() => {
                                     console.log('something went wrong');
                                 }}
                             />
-
                         </GoogleOAuthProvider>
                     </div>
                 </form>

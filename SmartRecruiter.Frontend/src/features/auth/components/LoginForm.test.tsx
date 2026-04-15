@@ -124,6 +124,6 @@ describe('LoginForm Component', () => {
 
         const button = screen.getByRole('button');
         expect(button).toBeDisabled();
-        expect(button).toHaveTextContent(/signing in/i); // Or whatever your loading text is
+        expect(button).toHaveTextContent(/signing in/i);
     });
 });
