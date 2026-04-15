@@ -26,7 +26,7 @@ jobs:
         run: dotnet build SmartRecruiterAI.sln --configuration Release --no-restore
 
       - name: 5. Run Tests
-        run: dotnet test SmartRecruiterAI.sln --no-build --verbosity normal
+        run: dotnet test SmartRecruiterAI.sln --configuration Release --no-build --verbosity normal
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
