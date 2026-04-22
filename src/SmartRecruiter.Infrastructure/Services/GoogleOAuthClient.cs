@@ -88,9 +88,17 @@ public class GoogleOAuthClient : IOAuthClient
             tokenData.refresh_token,
             tokenData.expires_in);
     }
+
+    public async Task<bool> VerifyAccessTokenAsync(string accessToken)
+    {
+        var request = new HttpRequestMessage(HttpMethod.Get, "https://gmail.googleapis.com/gmail/v1/users/me/profile");
+        request.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", accessToken);
     
-    
-    
+        var response = await _httpClient.SendAsync(request);
+        
+        return response.IsSuccessStatusCode;
+    }
+
     private class GoogleTokenResponseInternal {
         public string access_token { get; set; }
         public string refresh_token { get; set; }

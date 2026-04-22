@@ -70,15 +70,16 @@ public class GmailAuthService : IGmailAuthService
 
         if (integration == null)
         {
-            return new IntegrationStatusDto(
-                false,
-                null
-                );
+            return new IntegrationStatusDto(false, null);
         }
 
-        return new IntegrationStatusDto(
-            true,
-            integration.ConnectedEmail
-            );
+        var isValid = await _authClient.VerifyAccessTokenAsync(integration.AccessToken);
+
+        if (!isValid)
+        {
+            await RefreshIntegrationAsync(userId);
+        }
+
+        return new IntegrationStatusDto(true, integration.ConnectedEmail);
     }
 }
